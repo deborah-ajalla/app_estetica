@@ -1,0 +1,19 @@
+import mysql.connector
+
+class Manejo_stock:
+    def __init__(self):
+        self.conexion = mysql.connector.connect(host ="localhost",user="root", password="", database="articulos")
+        self.cursor1= self.conexion.cursor() # abro un cursor para recorrer y enventualmente modificar los datos
+
+    def nuevo_articulo(self,articulo, cantidad, precio):
+        nuevo_articulo = articulo, precio, cantidad
+        sql = 'insert into articulos (articulo, cantidad, precio) values (%s, %s, %s)'
+        self.cursor1.execute(sql, nuevo_articulo)
+        self.conexion.commit()
+        self.conexion.close()
+        print("Se agregado correctamente el articulo")
+        return nuevo_articulo
+
+
+manejador = Manejo_stock()
+articulo1 = manejador.nuevo_articulo('crema 1', 5, 23.5)
