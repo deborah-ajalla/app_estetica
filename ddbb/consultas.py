@@ -1,3 +1,4 @@
+import sqlite3
 from .conexion import Conexion
 #------------------------------------------
 def crear_tabla():
@@ -21,7 +22,9 @@ def crear_tabla():
                CREATE TABLE IF NOT EXISTS tratamientos
              (
               ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-              NOMBRE TEXT NOT NULL
+              NOMBRE_t TEXT NOT NULL,
+              DNI TEXT NOT NULL UNIQUE, 
+              PROCEDIMIENTO TEXT NOT NULL
               );
 
               CREATE TABLE IF NOT EXISTS productos
@@ -162,15 +165,45 @@ def listar_pacientes_por_dni(dni):
     return paciente  # Retorna una tupla con los datos o None si no encuentra el paciente
 
 
-# def listar_pacientes_por_dni(dni):
-#     cone = Conexion()  # Conectar a la base de datos
+#------------------------------------------
+class Tratamiento():
 
-#     sql = ("SELECT nombre, apellido, dni, celular, email FROM pacientes WHERE dni = ?", (dni,))
+    def __init__(self, nombre_t, dni, procedimiento):
+        self.id_paciente = None
+        self.nombre_t = nombre_t
+        self.dni = dni
+        self.procedimiento = procedimiento   
 
-#     
-#     cone.cursor.execute(sql) # Consulta la bd para obtener los datos del paciente por DNI
-#     paciente = cone.cursor.fetchone()  # Obtener el primer resultado encontrado
+    def __str__(self):
+        return f'Tratamiento [{self.nombre_t}, {self.dni}, {self.procedimiento}]'
+#------------------------------------------
 
-#     cone.cerrar_conexion() # Cerrar la conexión a la base de datos
+def guardar_tratamiento(tratamiento):
+    cone = Conexion()
 
-#     return paciente  # Retorna una tupla con los datos o None si no encuentra el paciente
+    sql= f'''
+              INSERT INTO tratamientos(Nombre_t,Dni,Procedimiento)
+              VALUES('{tratamiento.nombre_t}','{tratamiento.dni}','{tratamiento.procedimiento}');
+         '''
+    try:
+        cone.cursor.execute(sql)
+    except  Exception as e:
+        print(f"Error al guardar el tratamiento: {e}")  # Mostrar error en consola
+    finally:
+        cone.cerrar_conexion()
+    sql = '''
+        INSERT INTO tratamientos (Nombre_t, Dni, Procedimiento)
+        VALUES (?, ?, ?);
+    '''
+    # nombre_t = str(tratamiento.nombre_t).strip()
+    # dni = str(tratamiento.dni).strip()
+    # procedimiento = str(tratamiento.procedimiento).strip()
+    # try:
+    #     cone.cursor.execute(sql, (nombre_t, dni, procedimiento))
+    #     cone.conexion.commit()  # Confirmar los cambios en la base de datos
+    #     #messagebox.showinfo("Éxito", "Tratamiento guardado correctamente.")   Mensaje de éxito en la GUI
+    # except Exception as e:
+    #     print(f"Error al guardar el tratamiento: {e}")  # Mostrar error en consola
+    #    # messagebox.showerror("Error", f"No se pudo guardar el tratamiento: {e}")   Mensaje en la GUI
+    # finally:
+    #     cone.cerrar_conexion()

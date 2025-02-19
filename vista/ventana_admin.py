@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from ddbb.consultas import Paciente, crear_tabla, guardar_paciente, listar_pacientes, editar_paciente, borrar_paciente
 from vista.ventana_buscar import Buscar
-from vista.ventana_tratamiento import Tratamiento
+from vista.ventana_tratamiento import Tratamiento_App
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -73,7 +73,7 @@ def vista_tratamiento(root):
     frame_ventana_tratamiento.place(x=0, y=0, width=1000, height=600) 
   
   
-    Tratamiento (frame_ventana_tratamiento)    # instancia la Clase 
+    Tratamiento_App (frame_ventana_tratamiento)    # instancia la Clase 
 #--------------------------------
 class Admin (tk.Frame):
     def __init__(self, root = None):
@@ -163,9 +163,7 @@ class Admin (tk.Frame):
         self.boton_cancelar.place(x = 690, y = 260)
     #-----------------------------------------------
     def guardar_campos(self):
-
-        print("Guardando datos...")  # Para ver si la función se está ejecutando
-
+       # print("Guardando datos...")   Para ver si la función se está ejecutando
         paciente = Paciente(    # -> se instancia la clase
             self.nombre.get(),
             self.apellido.get(),
