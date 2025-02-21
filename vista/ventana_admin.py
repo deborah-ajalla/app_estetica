@@ -3,6 +3,7 @@ from tkinter import ttk
 from ddbb.consultas import Paciente, crear_tabla, guardar_paciente, listar_pacientes, editar_paciente, borrar_paciente
 from vista.ventana_buscar import Buscar
 from vista.ventana_tratamiento import Tratamiento_App
+from vista.ver_tratamientos import Ver_tratamientos
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -25,13 +26,13 @@ def menu_panel_admin(root):
     opciones_1.add_command(label= 'Cargar Nuevo', command=lambda: vista_paciente(root))
     opciones_1.add_command(label= 'Buscar', command= lambda: vista_buscar(root)) 
    
-    submenu_pacientes.add_command(label='Por ID')
-    submenu_pacientes.add_command(label='Por DNI')
-    submenu_pacientes.add_command(label='Por Apellido')
+    # submenu_pacientes.add_command(label='Por ID')
+    # submenu_pacientes.add_command(label='Por DNI')
+    # submenu_pacientes.add_command(label='Por Apellido')
 
     barra_menu.add_cascade (label='Tratamiento', menu=opciones_2)
     opciones_2.add_command (label= 'Cargar Nuevo', command= lambda: vista_tratamiento(root))
-    opciones_2.add_command (label= 'Listado')
+    opciones_2.add_command (label= 'Ver Tratamientos', command= lambda: ver_tratamientos(root))
 
     barra_menu.add_cascade (label='Turnos', menu=opciones_3)
     opciones_3.add_command (label= 'Cargar Nuevo')
@@ -75,6 +76,16 @@ def vista_tratamiento(root):
   
     Tratamiento_App (frame_ventana_tratamiento)    # instancia la Clase 
 #--------------------------------
+def ver_tratamientos(root):
+    ventana_ver_tto = tk.Toplevel(root)  
+    ventana_ver_tto.title("Ver Tratamientos Realizados")
+    ventana_ver_tto.config(bg=TITULOS)
+    ventana_ver_tto.geometry("900x500+210+60")
+    ventana_ver_tto.resizable(0,0)
+
+    # instancia la Clase
+    ventana_ver_tto = Ver_tratamientos(ventana_ver_tto)   
+
 class Admin (tk.Frame):
     def __init__(self, root = None):
         super().__init__(root, width=1050, height=600, bg=PRIMARY)

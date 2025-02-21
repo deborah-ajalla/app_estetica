@@ -129,15 +129,15 @@ class Tratamiento_App(tk.Frame):
 
     def guardar_tratamiento(self):
 
-        nombre_t = self.nombre_t_var.get().strip()  # Nombre del tratamiento
-        dni = self.dni_var.get().strip()       # DNI del paciente
-        procedimiento = self.cuadro_t.get("1.0", tk.END).strip()  # Procedimiento (texto)               
+        nombre_t = self.nombre_t_var.get().strip()  # -> Nombre del tratamiento
+        dni = self.dni_var.get().strip()       # -> DNI del paciente
+        procedimiento = self.cuadro_t.get("1.0", tk.END).strip()  # -> Procedimiento (texto)               
         
         if not nombre_t or not procedimiento:
             messagebox.showwarning("Advertencia", "El nombre del tratamiento y el procedimiento no pueden estar vacíos.")
             return  # Detener la ejecución si falta algún dato
         
-        nuevo_tratamiento = Tratamiento(nombre_t, dni, procedimiento)
+        nuevo_tratamiento = Tratamiento(nombre_t, dni, procedimiento) # -> instancio la clase
     
         guardar_tratamiento(nuevo_tratamiento)
 
