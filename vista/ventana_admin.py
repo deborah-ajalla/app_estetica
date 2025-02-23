@@ -80,7 +80,7 @@ def ver_tratamientos(root):
     ventana_ver_tto = tk.Toplevel(root)  
     ventana_ver_tto.title("Ver Tratamientos Realizados")
     ventana_ver_tto.config(bg=TITULOS)
-    ventana_ver_tto.geometry("900x500+210+60")
+    ventana_ver_tto.geometry("900x520+210+120")
     ventana_ver_tto.resizable(0,0)
 
     # instancia la Clase

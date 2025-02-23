@@ -64,7 +64,7 @@ class Buscar (tk.Frame):
         self.cuadro_texto.delete("1.0", tk.END)
 
         if paciente:
-            self.cuadro_texto.insert(tk.END, f"- Nombre: {paciente[0]}\n- Apellido: {paciente[1]}\n- DNI: {paciente[2]}\n- Celular: {paciente[3]}\n- Email: {paciente[4]}".title())
+            self.cuadro_texto.insert(tk.END, f"- Nombre: {paciente[0].title()}\n- Apellido: {paciente[1].title()}\n- DNI: {paciente[2]}\n- Celular: {paciente[3]}\n- Email: {paciente[4]}")
 
             
             if not hasattr(self, 'boton_salir'):  # Si el botón de salir aún no existe -> lo crea

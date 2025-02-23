@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ddbb.consultas import listar_pacientes_por_dni
+from ddbb.consultas import buscar_por_dni_en_tto, buscar_tratamientos_por_dni
 #----------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -39,7 +39,7 @@ class Ver_tratamientos (tk.Frame):
         self.dni_buscado.place(x = 448, y = 100)
 
     def boton_buscar_tto(self):
-        self.boton_buscar_tto = tk.Button (self, text = 'Buscar', command= self.buscar_tto)
+        self.boton_buscar_tto = tk.Button (self, text = 'Buscar', command= self.buscar_por_dni)
         self.boton_buscar_tto.config(width = 12, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
         self.boton_buscar_tto.place(x = 315, y = 160)
     
@@ -74,21 +74,54 @@ class Ver_tratamientos (tk.Frame):
         self.label_tto = tk.Label(self, text = '——————  Tratamientos  ——————')
         self.label_tto.config(bg=TITULOS, fg='white', font= ("Nunito", 15))
         self.label_tto.place(x = 400, y = 215)
+      
+        frame_tto = tk.Frame(self)  # -> Creo un marco para contener el cuadro de texto y la barra de desplazamiento
+        frame_tto.place(x=400, y=250)
 
-        self.cuadro_tto = tk.Text(self, height=8, width=45, padx= 10, pady= 15, font = ('Arial', '11', 'bold'), fg=BOTONES)
-        self.cuadro_tto.place(x = 400, y = 250)
+        self.cuadro_tto = tk.Text(frame_tto, height=8, width=45, padx=15, pady=20, font=('Arial', '11', 'bold'), fg=BOTONES)
+        self.cuadro_tto.pack(side=tk.LEFT)
+ 
+        self.scrollbar_tto = tk.Scrollbar(frame_tto, command=self.cuadro_tto.yview) # Creo la barra de desplazamiento
+        self.scrollbar_tto.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.cuadro_tto.config(yscrollcommand=self.scrollbar_tto.set)  # Configuro el cuadro de texto para que use la barra de desplazamiento
 
         self.boton_salir = tk.Button (self, text = 'Salir', command= self.salir)
         self.boton_salir.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
         self.boton_salir.place(x = 390, y = 450)
 
+    def buscar_por_dni(self):
+        dni = self.dni_buscado.get().strip()
 
+        if not dni:  # -> Si el campo está vacío, no mostrar advertencia de inmediato
+            messagebox.showwarning("Advertencia", "Por favor, ingrese un DNI...")
+            return  
+        
+        paciente = buscar_por_dni_en_tto (dni) # -> importo de la bd
 
-    def buscar_tto(self):
-        pass
+        if paciente:  # -> Si el paciente existe, lleno los entrys
+            self.nombre_var.set(paciente[0].title())
+            self.apellido_var.set(paciente[1].title())
+       
+            tratamientos = buscar_tratamientos_por_dni(dni)   # -> Busca los tratamientos del paciente
+
+            self.cuadro_tto.delete("1.0", tk.END)  # Limpia el cuadro de texto antes de insertar nuevos datos
+
+            if tratamientos:
+                for tto in tratamientos:
+                    self.cuadro_tto.insert(tk.END, f"Tratamiento: {tto[0]}\nDescripción: {tto[1]}\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ \n\n")
+            else:
+                self.cuadro_tto.insert(tk.END, "No se encontraron tratamientos para este paciente.\n")
+
+        else:
+            messagebox.showerror("Error", "No se encontró un paciente con ese DNI")
+
 
     def limpiar_tto(self):
-        pass
+        self.dni_var.set("")   # Borra el contenido del Entry 
+        self.nombre_var.set("")
+        self.apellido_var.set("")
+        self.cuadro_tto.delete("1.0", tk.END)
 
     def salir(self):
         self.root.destroy()  # Cierra la ventana

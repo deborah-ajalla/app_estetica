@@ -23,15 +23,15 @@ def crear_tabla():
              (
               ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
               NOMBRE_t TEXT NOT NULL,
-              DNI TEXT NOT NULL UNIQUE, 
-              PROCEDIMIENTO TEXT NOT NULL
+              DNI TEXT NOT NULL,  
+              PROCEDIMIENTO TEXT NOT NULL,
+              FOREIGN KEY (dni) REFERENCES pacientes(dni)
               );
 
               CREATE TABLE IF NOT EXISTS productos
              (
               ID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
               NOMBRE TEXT NOT NULL        
-             
               );
 
            """
@@ -163,8 +163,6 @@ def listar_pacientes_por_dni(dni):
     finally:
         cone.cerrar_conexion()  # Cerrar la conexión a la base de datos
     return paciente  # Retorna una tupla con los datos o None si no encuentra el paciente
-
-
 #------------------------------------------
 class Tratamiento():
 
@@ -191,19 +189,34 @@ def guardar_tratamiento(tratamiento):
         print(f"Error al guardar el tratamiento: {e}")  # Mostrar error en consola
     finally:
         cone.cerrar_conexion()
-    sql = '''
-        INSERT INTO tratamientos (Nombre_t, Dni, Procedimiento)
-        VALUES (?, ?, ?);
-    '''
-    # nombre_t = str(tratamiento.nombre_t).strip()
-    # dni = str(tratamiento.dni).strip()
-    # procedimiento = str(tratamiento.procedimiento).strip()
-    # try:
-    #     cone.cursor.execute(sql, (nombre_t, dni, procedimiento))
-    #     cone.conexion.commit()  # Confirmar los cambios en la base de datos
-    #     #messagebox.showinfo("Éxito", "Tratamiento guardado correctamente.")   Mensaje de éxito en la GUI
-    # except Exception as e:
-    #     print(f"Error al guardar el tratamiento: {e}")  # Mostrar error en consola
-    #    # messagebox.showerror("Error", f"No se pudo guardar el tratamiento: {e}")   Mensaje en la GUI
-    # finally:
-    #     cone.cerrar_conexion()
+    # sql = '''
+    #     INSERT INTO tratamientos (Nombre_t, Dni, Procedimiento)
+    #     VALUES (?, ?, ?);
+    # '''
+#------------------------------------------
+def buscar_por_dni_en_tto(dni):
+    cone = Conexion()  # Conectar a la base de datos
+    try:
+        sql = "SELECT nombre, apellido FROM pacientes WHERE dni = ?"
+        cone.cursor.execute(sql, (dni,))
+        paciente = cone.cursor.fetchone()  # Obtener el primer resultado encontrado
+    except Exception as e:
+        print(f"Error en la consulta: {e}")
+        paciente = None
+    finally:
+        cone.cerrar_conexion()  # Cerrar la conexión a la base de datos
+    return paciente  # Retorna una tupla con los datos o None si no encuentra el paciente
+#------------------------------------------
+def buscar_tratamientos_por_dni(dni):
+    cone = Conexion()  # Conectar a la base de datos
+    try:
+        sql = "SELECT nombre_t, procedimiento FROM tratamientos WHERE dni = ?"
+        cone.cursor.execute(sql, (dni,))
+        tratamiento = cone.cursor.fetchall()
+    
+    except Exception as e:
+        print(f"Error en la consulta: {e}")
+        tratamiento = None
+    finally:
+        cone.cerrar_conexion()  # Cerrar la conexión a la base de datos
+    return tratamiento  # Retorna una tupla con los datos o None si no encuentra el paciente

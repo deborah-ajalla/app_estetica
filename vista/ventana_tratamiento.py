@@ -11,6 +11,7 @@ BOTONES = "#805AD5"
 class Tratamiento_App(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent, bg=PRIMARY)
+         #self.ver_tratamientos_app = ver_tratamientos_app     -> Referencia a la ventana ver_tratamientos
         self.place(x=0, y=0, width=1000, height=600) 
 
         self.dni_var = tk.StringVar()
@@ -23,7 +24,6 @@ class Tratamiento_App(tk.Frame):
         self.entry()
         self.boton_buscar()
         self.boton_limpiar()
-        # self.limpiar()
         self.datos_encontrados()
         self.ingresar_tratamiento()
         self.boton_guardar_tratamiento()
@@ -140,6 +140,11 @@ class Tratamiento_App(tk.Frame):
         nuevo_tratamiento = Tratamiento(nombre_t, dni, procedimiento) # -> instancio la clase
     
         guardar_tratamiento(nuevo_tratamiento)
+
+        # -> ACTUALIZAR cuadro_tto en Ver_tratamientos
+        # if self.ver_tratamientos_app:
+        #     self.ver_tratamientos_app.cuadro_tto.insert (tk.END, f"{nombre_t}\n{procedimiento}\n\n")
+
 
         messagebox.showinfo("Éxito", "Tratamiento guardado correctamente.")
         self.limpiar()
