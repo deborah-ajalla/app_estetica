@@ -4,6 +4,7 @@ from ddbb.consultas import Paciente, crear_tabla, guardar_paciente, listar_pacie
 from vista.ventana_buscar import Buscar
 from vista.ventana_tratamiento import Tratamiento_App
 from vista.ver_tratamientos import Ver_tratamientos
+from vista.ventana_turnos import Turnos_App
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -26,16 +27,12 @@ def menu_panel_admin(root):
     opciones_1.add_command(label= 'Cargar Nuevo', command=lambda: vista_paciente(root))
     opciones_1.add_command(label= 'Buscar', command= lambda: vista_buscar(root)) 
    
-    # submenu_pacientes.add_command(label='Por ID')
-    # submenu_pacientes.add_command(label='Por DNI')
-    # submenu_pacientes.add_command(label='Por Apellido')
-
     barra_menu.add_cascade (label='Tratamiento', menu=opciones_2)
     opciones_2.add_command (label= 'Cargar Nuevo', command= lambda: vista_tratamiento(root))
     opciones_2.add_command (label= 'Ver Tratamientos', command= lambda: ver_tratamientos(root))
 
     barra_menu.add_cascade (label='Turnos', menu=opciones_3)
-    opciones_3.add_command (label= 'Cargar Nuevo')
+    opciones_3.add_command (label= 'Cargar Nuevo', command= lambda: vista_turnos(root))
     opciones_3.add_command (label= 'Buscar')
 
     barra_menu.add_cascade (label='Agenda', menu=menu_inicio)
@@ -72,8 +69,7 @@ def vista_tratamiento(root):
     frame_ventana_tratamiento = tk.Frame(root, bg=PRIMARY)
     frame_ventana_tratamiento.config(bg=PRIMARY)
     frame_ventana_tratamiento.place(x=0, y=0, width=1000, height=600) 
-  
-  
+    
     Tratamiento_App (frame_ventana_tratamiento)    # instancia la Clase 
 #--------------------------------
 def ver_tratamientos(root):
@@ -85,7 +81,19 @@ def ver_tratamientos(root):
 
     # instancia la Clase
     ventana_ver_tto = Ver_tratamientos(ventana_ver_tto)   
+#--------------------------------
 
+def vista_turnos(root):
+    for widget in root.winfo_children():  # Verifica si ya hay un Frame cargado y lo destruye
+        if isinstance(widget, tk.Frame):
+            widget.destroy()
+ 
+    frame_ventana_turnos = tk.Frame(root, bg=PRIMARY)
+    frame_ventana_turnos.config(bg=PRIMARY)
+    frame_ventana_turnos.place(x=0, y=0, width=1000, height=600) 
+  
+    Turnos_App (frame_ventana_turnos)    # instancia la Clase 
+#--------------------------------
 class Admin (tk.Frame):
     def __init__(self, root = None):
         super().__init__(root, width=1050, height=600, bg=PRIMARY)
