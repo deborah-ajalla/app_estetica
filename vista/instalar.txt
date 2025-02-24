@@ -1,0 +1,6 @@
+ filedialog
+ pil
+ pillow
+ reportlab
+ qrcode
+ 
