@@ -158,13 +158,6 @@ class Turnos_App(tk.Frame):
 
         messagebox.showinfo("Reserva Confirmada", "Su turno ha sido reservado correctamente.")
     
-    # def imprimir (self):   # -> PARA GUARDAR EL RECIBO COMO ARCHIVO DE TEXTO--- 
-    #     info_turno = self.cuadro_turno.get(1.0, )     #guardo el contenido del recibo en una variable
-    #     archivo = filedialog.asksaveasfile(mode='w', defaultextension= '.txt')  #guardo en un archivo txt
-    #     archivo.write(info_turno)   #escribo el recibo
-    #     archivo.close()              #cierro el archivo
-    #     messagebox.showinfo('Informacion', 'Su Recibo Ha Sido Guardado!') #abre una ventana cuando ya guardé el archivo de texto
-
     def imprimir(self):
         contenido = self.cuadro_turno.get(1.0, tk.END).strip()
         if not contenido:
