@@ -194,7 +194,6 @@ class Admin (tk.Frame):
         self.boton_cancelar.place(x = 690, y = 260)
     #-----------------------------------------------
     def guardar_campos(self):
-       # print("Guardando datos...")   Para ver si la función se está ejecutando
         paciente = Paciente(    # -> se instancia la clase
             self.nombre.get(),
             self.apellido.get(),
@@ -220,6 +219,8 @@ class Admin (tk.Frame):
         self.boton_guardar.config (state='normal')
         self.boton_cancelar.config (state='normal')
         self.boton_nuevo.config (state='disabled')
+
+        self.entry_nombre.focus_set()      # -> Coloca el cursor en el Entry de Fecha Disponible
     #-----------------------------------------------
     def bloquear_campos(self):
         self.entry_nombre.config (state='disabled')

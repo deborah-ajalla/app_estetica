@@ -23,6 +23,7 @@ class Buscar_Turnos(tk.Frame):
         self.entry()
         self.boton_buscar()
         self.boton_limpiar()
+        self.frame_turno = None  # Inicialmente no existe el frame
 
     def titulo(self):
         self.titulo = tk.Label(self, text= "✦ Búsqueda de Turnos ✦ ", font=("Nunito", 22, "bold"), fg='white', bg=TITULOS)
@@ -49,7 +50,6 @@ class Buscar_Turnos(tk.Frame):
         self.boton_limpiar.config(width = 12, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
         self.boton_limpiar.place(x = 494, y = 160)
 
-
     def buscar_turno_por_dni(self):
         dni = self.dni_buscado.get().strip()
 
@@ -59,43 +59,55 @@ class Buscar_Turnos(tk.Frame):
 
         paciente = listar_pacientes_por_dni(dni)
 
-        if not hasattr(self, 'cuadro_turno'): # si no hay cuadro de texto -> lo crea
-            self.cuadro_turno = tk.Text(self, height=11, width=40, padx= 30, pady= 30, font = ('Arial', '12', 'bold'), fg=BOTONES)
-            self.cuadro_turno.place(x = 267, y = 240)
+        # if not hasattr(frame_turno, 'cuadro_turno'): # si no hay cuadro de texto -> lo crea
+           
+        #     self.cuadro_turno = tk.Text(frame_turno, height=11, width=40, padx= 30, pady= 30, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        #     self.cuadro_turno.place(x = 267, y = 240)
+        #     self.scrollbar_turno = tk.Scrollbar(frame_turno, command=self.cuadro_turno.yview) # Creo la barra de desplazamiento
+        #     self.scrollbar_turno.pack(side=tk.RIGHT, fill=tk.Y)
+        #     self.cuadro_turno.config(yscrollcommand= self.scrollbar_turno.set) # Configuro el cuadro de texto para que use la barra de desplazamiento
 
-        self.cuadro_turno.delete("1.0", tk.END)
+        # -> Si ya existe un frame, eliminarlo antes de crear uno nuevo
+        if self.frame_turno:
+            self.frame_turno.destroy()
 
-        if paciente:
-            
+        # -> Crea un nuevo frame para contener el cuadro de texto y la barra scroll
+        self.frame_turno = tk.Frame(self)
+        self.frame_turno.place(x=267, y=240)
+
+        # -> Cuadro de texto con scroll
+        self.cuadro_turno = tk.Text(self.frame_turno, height=11, width=40, padx=30, pady=30, font=('Arial', '12', 'bold'), fg=BOTONES,wrap="word")
+        self.scrollbar_turno = tk.Scrollbar(self.frame_turno, command=self.cuadro_turno.yview)
+
+        self.cuadro_turno.config(yscrollcommand=self.scrollbar_turno.set)
+
+        self.cuadro_turno.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.scrollbar_turno.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.cuadro_turno.delete("1.0", tk.END)   # -> Inserta datos si el paciente existe
+ 
+        if paciente:       
             nombre = paciente[0].title()
             apellido = paciente[1].title()
             celular = paciente[3]
             email = paciente[4]
+    
+            turnos = obtener_turnos_por_dni(dni)    # -> Obtiene turnos del paciente
 
-            # Obtener turnos del paciente
-            turnos = obtener_turnos_por_dni(dni)
-
-            # Construir el mensaje
-            info_paciente = f"         ~~~ DATOS DEL PACIENTE ~~~\n\n -  Nombre: {nombre}\n -  Apellido: {apellido}\n -  DNI: {dni}\n -  Celular: {celular}\n -  Email: {email}\n\n"
+            #  -> Mensaje
+            info_paciente = f"          ~~~ DATOS DEL PACIENTE ~~~\n\n    -  Nombre: {nombre} {apellido}\n    -  DNI: {dni}\n    -  Celular: {celular}\n    -  Email: {email}\n\n\n"
 
             if turnos:
-                info_turnos = "         ~~~ TURNOS REGISTRADOS ~~~\n"
+                info_turnos = "          ~~~ TURNOS REGISTRADOS ~~~\n"
                 for fecha, horario in turnos:
-                    info_turnos += f"\n - {fecha} a las {horario} hs"
-                info_turnos += "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                    info_turnos += f"\n    -    {fecha} a las {horario} hs"
+                info_turnos += "\n\n      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             else:
                 info_turnos = "\nNo tiene turnos registrados."
 
-            # Insertar datos en el cuadro de texto
+            # -> Inserta datos en el cuadro de texto
             self.cuadro_turno.insert(tk.END, info_paciente + info_turnos)
-    
-    # else:
-    #     messagebox.showerror("Error", "No se encontró un paciente con ese DNI")
-
-
-
-            # self.cuadro_turno.insert(tk.END, f"         ~~~ SU PRÓXIMO TURNO ~~~\n\n -  Fecha: \n\n -  Nombre: {paciente[0].title()}\n -  Apellido: {paciente[1].title()}\n -  DNI: {paciente[2]}\n -  Celular: {paciente[3]}\n -  Email: {paciente[4]}")
-
+        
             if not hasattr(self, 'boton_imprimir'):
                 self.boton_imprimir = tk.Button (self, text = 'Imprimir', command=self.imprimir)
                 self.boton_imprimir.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
@@ -105,16 +117,16 @@ class Buscar_Turnos(tk.Frame):
                 self.boton_qr = tk.Button (self, text = 'QR', command= self.qr)
                 self.boton_qr.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
                 self.boton_qr.place(x = 494, y = 530)
-
         else:
             messagebox.showwarning("ADVERTENCIA!", "EL DNI INGRESADO NO ESTÁ REGISTRADO...")
-            # self.cuadro_turno.insert(tk.END, "Debe ingresar un DNI para comenzar la búsqueda...")
+            self.cuadro_turno.insert(tk.END, "Debe ingresar un DNI para la búsqueda...")
 
     def limpiar(self):
         self.dni_var.set("")   # -> Borra el contenido del Entry
         self.cuadro_turno.delete(1.0, tk.END)  # -> Limpia el cuadro de texto
 
-          
+        self.dni_buscado.focus_set()    # -> Coloca el cursor en el Entry de Fecha Disponible
+         
         if hasattr(self, "qr_label"): # -> Si existe un Label para el QR, lo elimina
             self.qr_label.destroy()
             del self.qr_label  # -> Elimina la referencia para evitar errores

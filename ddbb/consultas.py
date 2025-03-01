@@ -1,5 +1,6 @@
 import sqlite3
 from .conexion import Conexion
+from tkinter import messagebox
 #------------------------------------------
 def crear_tabla():
     cone = Conexion()
@@ -225,15 +226,61 @@ def buscar_tratamientos_por_dni(dni):
         cone.cerrar_conexion()  # Cerrar la conexión a la base de datos
     return tratamiento  # Retorna una tupla con los datos o None si no encuentra el paciente
 #------------------------------------------
+def verificar_turno_ocupado(fecha, horario):
+    cone = Conexion()
+    sql = "SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ?"
+
+    try:
+        cone.cursor.execute(sql, (fecha, horario))
+        resultado = cone.cursor.fetchone()
+        return resultado[0] > 0  # -> Retorna True si el turno está ocupado
+    except Exception as e:
+        print("Error al verificar el turno:", e)
+        return False
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def verificar_horario_ocupado(fecha):    # ->devuelve una lista de horarios ocupados
+    cone = Conexion()
+    sql = "SELECT horario FROM turnos WHERE fecha = ?"
+    
+    try:        
+        # Consulta para obtener los horarios ocupados en la fecha seleccionada
+        cone.cursor.execute(sql, (fecha,))
+        resultados = cone.cursor.fetchall()  # Obtiene todos los horarios ocupados
+        
+        # Convertir los resultados en una lista de horarios
+        horarios_ocupados = [fila[0] for fila in resultados]
+        
+        # Cerrar la conexión
+        cone.conexion.close()
+        
+        return horarios_ocupados    
+    except Exception as e:
+        print(f"Error al consultar la base de datos: {e}")
+        return []
+#------------------------------------------
 def guardar_turno_en_bd(dni, fecha, horario):
    
     cone = Conexion()
     sql = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
+
+    # -> Verifica si el turno ya está ocupado
+    sql_verificar = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ?"""
+    sql_insertar = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
     
     try:
-        cone.cursor.execute(sql, (dni, fecha, horario))
+        cone.cursor.execute(sql_verificar, (fecha, horario))
+        resultado = cone.cursor.fetchone()
+        if resultado[0] > 0:
+            messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
+            return False  # -> No se puede reservar el turno
+        
+        # -> Si el turno está disponible, lo guarda en la base de datos
+        cone.cursor.execute(sql_insertar, (dni, fecha, horario))
         cone.conexion.commit()
         return True  # -> Retorna True si la inserción fue exitosa
+      
     except sqlite3.Error as e:
         print("Error al guardar el turno:", e)
         return False
