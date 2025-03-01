@@ -34,11 +34,20 @@ def crear_tabla():
               NOMBRE TEXT NOT NULL        
               );
 
+               CREATE TABLE IF NOT EXISTS turnos
+              (
+              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              DNI TEXT NOT NULL,
+              FECHA TEXT NOT NULL,
+              HORARIO TEXT NOT NULL,
+              FOREIGN KEY (DNI) REFERENCES pacientes(DNI)
+              );
+
            """
     try:
         cone.cursor.executescript(sql)
-    except:
-        pass
+    except Exception as e:
+        print("Error al crear tablas:", e)
     finally:
         cone.cerrar_conexion()
 
@@ -175,7 +184,6 @@ class Tratamiento():
     def __str__(self):
         return f'Tratamiento [{self.nombre_t}, {self.dni}, {self.procedimiento}]'
 #------------------------------------------
-
 def guardar_tratamiento(tratamiento):
     cone = Conexion()
 
@@ -189,10 +197,6 @@ def guardar_tratamiento(tratamiento):
         print(f"Error al guardar el tratamiento: {e}")  # Mostrar error en consola
     finally:
         cone.cerrar_conexion()
-    # sql = '''
-    #     INSERT INTO tratamientos (Nombre_t, Dni, Procedimiento)
-    #     VALUES (?, ?, ?);
-    # '''
 #------------------------------------------
 def buscar_por_dni_en_tto(dni):
     cone = Conexion()  # Conectar a la base de datos
@@ -220,3 +224,33 @@ def buscar_tratamientos_por_dni(dni):
     finally:
         cone.cerrar_conexion()  # Cerrar la conexión a la base de datos
     return tratamiento  # Retorna una tupla con los datos o None si no encuentra el paciente
+#------------------------------------------
+def guardar_turno_en_bd(dni, fecha, horario):
+   
+    cone = Conexion()
+    sql = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
+    
+    try:
+        cone.cursor.execute(sql, (dni, fecha, horario))
+        cone.conexion.commit()
+        return True  # -> Retorna True si la inserción fue exitosa
+    except sqlite3.Error as e:
+        print("Error al guardar el turno:", e)
+        return False
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def obtener_turnos_por_dni(dni):
+  
+    cone = Conexion()
+    sql = "SELECT FECHA, HORARIO FROM turnos WHERE DNI = ? ORDER BY FECHA, HORARIO"
+
+    try:
+        cone.cursor.execute(sql, (dni,))
+        turnos = cone.cursor.fetchall()  # -> Lista de tuplas con (fecha, horario)
+        return turnos
+    except sqlite3.Error as e:
+        print("Error al obtener los turnos:", e)
+        return []
+    finally:
+        cone.cerrar_conexion()

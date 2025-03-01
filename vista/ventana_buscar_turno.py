@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from ddbb.consultas import listar_pacientes_por_dni
+from ddbb.consultas import listar_pacientes_por_dni, obtener_turnos_por_dni
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import qrcode
@@ -66,7 +66,35 @@ class Buscar_Turnos(tk.Frame):
         self.cuadro_turno.delete("1.0", tk.END)
 
         if paciente:
-            self.cuadro_turno.insert(tk.END, f"         ~~~ SU PRÓXIMO TURNO ~~~\n\n -  Fecha: \n\n -  Nombre: {paciente[0].title()}\n -  Apellido: {paciente[1].title()}\n -  DNI: {paciente[2]}\n -  Celular: {paciente[3]}\n -  Email: {paciente[4]}")
+            
+            nombre = paciente[0].title()
+            apellido = paciente[1].title()
+            celular = paciente[3]
+            email = paciente[4]
+
+            # Obtener turnos del paciente
+            turnos = obtener_turnos_por_dni(dni)
+
+            # Construir el mensaje
+            info_paciente = f"         ~~~ DATOS DEL PACIENTE ~~~\n\n -  Nombre: {nombre}\n -  Apellido: {apellido}\n -  DNI: {dni}\n -  Celular: {celular}\n -  Email: {email}\n\n"
+
+            if turnos:
+                info_turnos = "         ~~~ TURNOS REGISTRADOS ~~~\n"
+                for fecha, horario in turnos:
+                    info_turnos += f"\n - {fecha} a las {horario} hs"
+                info_turnos += "\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            else:
+                info_turnos = "\nNo tiene turnos registrados."
+
+            # Insertar datos en el cuadro de texto
+            self.cuadro_turno.insert(tk.END, info_paciente + info_turnos)
+    
+    # else:
+    #     messagebox.showerror("Error", "No se encontró un paciente con ese DNI")
+
+
+
+            # self.cuadro_turno.insert(tk.END, f"         ~~~ SU PRÓXIMO TURNO ~~~\n\n -  Fecha: \n\n -  Nombre: {paciente[0].title()}\n -  Apellido: {paciente[1].title()}\n -  DNI: {paciente[2]}\n -  Celular: {paciente[3]}\n -  Email: {paciente[4]}")
 
             if not hasattr(self, 'boton_imprimir'):
                 self.boton_imprimir = tk.Button (self, text = 'Imprimir', command=self.imprimir)
@@ -80,7 +108,7 @@ class Buscar_Turnos(tk.Frame):
 
         else:
             messagebox.showwarning("ADVERTENCIA!", "EL DNI INGRESADO NO ESTÁ REGISTRADO...")
-            self.cuadro_turno.insert(tk.END, "Debe ingresar un DNI para comenzar la búsqueda...")
+            # self.cuadro_turno.insert(tk.END, "Debe ingresar un DNI para comenzar la búsqueda...")
 
     def limpiar(self):
         self.dni_var.set("")   # -> Borra el contenido del Entry

@@ -170,15 +170,14 @@ class Aplicacion (tk.Frame):
 #-----------------------------------------------
     # --> LOGIN ADMIN
     def ingreso_admin(self):
-            if self.clave_admin.get() == "abc123":  # clave predefinida
-                messagebox.showinfo("BIENVENIDO", "INGRESO EXITOSO!!")
-                self.ventana_admin.destroy() # Cierra la ventana de login
+            if self.clave_admin.get() == "abc123":  # -> clave predefinida
+                self.ventana_admin.destroy() # -> Cierra la ventana de login
 
-                # Creo  nueva ventana para Admin
+                # -> Creo  nueva ventana para Admin
                 self.panel_admin = tk.Toplevel(self.root)
-                self.panel_admin.geometry("1000x600+160+50")     # medidas de la ventana
-                self.panel_admin.title("Administrador de Centro de Estética")     # titulo de la ventana
-                Admin(self.panel_admin)      # Llamo a la clase Admin
+                self.panel_admin.geometry("1000x600+160+50")     # -> medidas de la ventana
+                self.panel_admin.title("Administrador de Centro de Estética")     # -> titulo de la ventana
+                Admin(self.panel_admin)      # -> Llamo a la clase Admin
                 menu_panel_admin(self.panel_admin)
 
             else:

@@ -5,6 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import qrcode
 from PIL import Image, ImageTk  
+from ddbb.consultas import buscar_por_dni_en_tto, guardar_turno_en_bd
 
 
 # --> Se define paleta colores 
@@ -31,15 +32,27 @@ class Turnos_App(tk.Frame):
         self.titulo.place(x=320, y=30 ) 
 
     def label(self):
-        self.label_fecha = tk.Label(self, text = 'Primera Fecha Disponible: ')
+        self.label_fecha = tk.Label(self, text = 'Fecha Disponible: ')
         self.label_fecha.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_fecha.place(x = 285, y = 112)
-    
+        self.label_fecha.place(x = 285, y = 90)
+
+        self.label_hora = tk.Label(self, text = 'Elegir Horario : ')
+        self.label_hora.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
+        self.label_hora.place(x = 285, y = 125)
+           
     def entry(self):
         self.fecha_var = tk.StringVar()
         self.fecha_disponible = tk.Entry(self, textvariable = self.fecha_var)
         self.fecha_disponible.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.fecha_disponible.place(x = 550, y = 112)
+        self.fecha_disponible.place(x = 550, y = 90)
+  
+        self.horarios = ["08:00", "09:30", "11:00", "12:30", "15:00", "16:30", "18:00"]   # -> Lista de horarios disponibles 
+
+        self.hora_var = tk.StringVar()     # Variable para el horario seleccionado
+    
+        self.combo_horarios = ttk.Combobox(self, textvariable=self.hora_var, values=self.horarios, state="readonly")   # -> Desplegable de horarios
+        # self.combo_horarios.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.combo_horarios.place(x = 550, y = 125)
 
     def boton_buscar_fecha(self):
         self.boton_buscar_fecha = tk.Button (self, text = 'Buscar', command= self.buscar_fecha_turno)
@@ -52,10 +65,20 @@ class Turnos_App(tk.Frame):
         self.boton_reservar.place(x = 495, y = 170)
 
     def carga_datos(self):
+
+        self.label_dni_buscado = tk.Label(self, text = 'Dni: ')
+        self.label_dni_buscado.config(bg= PRIMARY, fg= BOTONES, font= ("Nunito", 14, "bold"))
+       
+        self.dni_var = tk.StringVar()
+        self.dni_buscado = tk.Entry(self, textvariable = self.dni_var)
+        self.dni_buscado.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
+  
+        self.boton_buscar = tk.Button (self, text = ' 🔍', command= self.buscar_por_dni)
+        self.boton_buscar.config(width = 10, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
+       
         self.label_nombre_turno = tk.Label(self, text = 'Nombre: ')
         self.label_nombre_turno.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14))
-        self.label_nombre_turno.place(x = 215, y = 260)
-
+      
         self.nombre_turno_var = tk.StringVar()
         self.nombre_turno = tk.Entry(self, textvariable = self.nombre_turno_var)
         self.nombre_turno.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
@@ -66,28 +89,7 @@ class Turnos_App(tk.Frame):
         self.apellido_turno_var = tk.StringVar()
         self.apellido_turno = tk.Entry(self, textvariable = self.apellido_turno_var)
         self.apellido_turno.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-    
-        self.label_dni_turno = tk.Label(self, text = 'Dni: ')
-        self.label_dni_turno.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14))
-    
-        self.dni_turno_var = tk.StringVar()
-        self.dni_turno = tk.Entry(self, textvariable = self.dni_turno_var)
-        self.dni_turno.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-       
-        self.label_cel_turno = tk.Label(self, text = 'Celular: ')
-        self.label_cel_turno.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14))
-      
-        self.cel_turno_var = tk.StringVar()
-        self.cel_turno = tk.Entry(self, textvariable = self.cel_turno_var)
-        self.cel_turno.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-    
-        self.label_mail_turno = tk.Label(self, text = 'Mail: ')
-        self.label_mail_turno.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14))
-     
-        self.mail_turno_var = tk.StringVar()
-        self.mail_turno = tk.Entry(self, textvariable = self.mail_turno_var)
-        self.mail_turno.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-       
+           
         self.cuadro_turno= tk.Text(self, height=9, width=30, padx= 15, pady= 23, font = ('Arial', '11'), fg=BOTONES)
     
         self.boton_guardar_turno = tk.Button (self, text = 'Guardar', command=self.guardar_turno)
@@ -100,27 +102,23 @@ class Turnos_App(tk.Frame):
         self.boton_qr.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
 
         self.boton_limpiar = tk.Button (self, text = 'Limpiar', command= self.limpiar)
-        self.boton_limpiar.config(width = 12, font = ('Arial', '12', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
+        self.boton_limpiar.config(width = 11, font = ('Arial', '12', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
     
     def mostrar_campos_datos(self):  # -> muestro los campos despues de click en reservar
-        self.label_nombre_turno.place(x=215, y=260)
-        self.nombre_turno.place(x=302, y=260)  # entry
+        self.label_dni_buscado.place(x = 196, y = 264)
+        self.dni_buscado.place(x = 270, y = 264)
 
-        self.label_apellido_turno.place(x=215, y=300)
-        self.apellido_turno.place(x=302, y=300) # entry
+        self.boton_buscar.place(x = 250, y = 310)
 
-        self.label_dni_turno.place(x=215, y=340)
-        self.dni_turno.place(x=302, y=340) # entry
+        self.label_nombre_turno.place(x=180, y=370)
+        self.nombre_turno.place(x=270, y=370)  # entry
 
-        self.label_cel_turno.place(x=215, y=380)
-        self.cel_turno.place(x=302, y=380) # entry
-
-        self.label_mail_turno.place(x=215, y=420)
-        self.mail_turno.place(x=302, y=420) # entry
+        self.label_apellido_turno.place(x=180, y=415)
+        self.apellido_turno.place(x=270, y=415) # entry
 
         self.cuadro_turno.place(x=490, y=260)  # cuadro de texto
 
-        self.boton_guardar_turno.place(x = 270, y = 480) # botón
+        self.boton_guardar_turno.place(x = 245, y = 480) # botón
 
         self.boton_imprimir.place(x = 505, y = 480)  # botón
 
@@ -139,24 +137,40 @@ class Turnos_App(tk.Frame):
             self.mostrar_campos_datos()
             self.campos_cargados = True
 
+    def buscar_por_dni(self):
+        dni = self.dni_buscado.get().strip()
+
+        if not dni:  # -> Si el campo está vacío, no mostrar advertencia de inmediato
+            messagebox.showwarning("Advertencia", "Por favor, ingrese un DNI...")
+            return  
+        
+        paciente = buscar_por_dni_en_tto (dni) # -> importo de la bd
+
+        if paciente:  # -> Si el paciente existe, lleno los entrys
+            self.nombre_turno_var.set(paciente[0].title())
+            self.apellido_turno_var.set(paciente[1].title())
+        else:
+            messagebox.showerror("Error", "No se encontró un paciente con ese DNI")
+
     def guardar_turno(self):
         nombre = self.nombre_turno_var.get()
         apellido = self.apellido_turno_var.get()
-        dni = self.dni_turno_var.get()
-        celular = self.cel_turno_var.get()
-        mail = self.mail_turno_var.get()
+        dni = self.dni_var.get()
         fecha = self.fecha_var.get()
+        horario = self.hora_var.get()
        
-        if not (nombre and apellido and dni and celular and mail and fecha): # -> Valida que todos los datos estén completos
+        if not (nombre and apellido and dni and fecha and horario): # -> Valida que todos los datos estén completos
             messagebox.showwarning("Datos incompletos", "Por favor, complete todos los campos antes de reservar.")
             return
-
-        # Muestro los datos en el cuadro de texto
-        self.cuadro_turno.delete(1.0, tk.END)  # Limpiar el cuadro
-        reserva_texto = f"~~~ Reserva Confirmada ~~~\n\n -   Fecha: {fecha}\n -   Nombre: {(nombre).title()} {(apellido).title()}\n -   DNI: {dni}\n -   Celular: {celular}\n -   Email: {mail} \n~~~~~~~~~~~~~~~~~~~~~~"
-        self.cuadro_turno.insert(tk.END, reserva_texto)
-
-        messagebox.showinfo("Reserva Confirmada", "Su turno ha sido reservado correctamente.")
+        
+           
+        if guardar_turno_en_bd(dni, fecha, horario): # -> Guarda en la BD
+            self.cuadro_turno.delete(1.0, tk.END)    # ->  Limpia el cuadro de texto
+            reserva_texto = f"~~~ Reserva Confirmada ~~~\n\n - Fecha: {fecha}\n - Horario: {horario}\n - Nombre: {nombre.title()} {apellido.title()}\n - DNI: {dni}\n\n~~~~~~~~~~~~~~~~~~~~~~"
+            self.cuadro_turno.insert(tk.END, reserva_texto)
+            # messagebox.showinfo("Reserva Confirmada", "Su turno ha sido reservado correctamente.")
+        else:
+            messagebox.showerror("Error", "No se pudo guardar el turno en la base de datos.")
     
     def imprimir(self):
         contenido = self.cuadro_turno.get(1.0, tk.END).strip()
@@ -209,10 +223,11 @@ class Turnos_App(tk.Frame):
         self.fecha_var.set("")
         self.nombre_turno_var.set("")
         self.apellido_turno_var.set("")
-        self.dni_turno_var.set("")
-        self.cel_turno_var.set("")
-        self.mail_turno_var.set("")
+        self.dni_var.set("")
+        self.hora_var.set("")  # -> Limpia el combobox
         self.cuadro_turno.delete(1.0, tk.END)  # -> Limpia el cuadro de texto
+    
+        self.fecha_disponible.focus_set()    # -> Coloca el cursor en el Entry de Fecha Disponible
 
         # -> Si existe un Label para el QR, lo elimina
         if hasattr(self, "qr_label"):
