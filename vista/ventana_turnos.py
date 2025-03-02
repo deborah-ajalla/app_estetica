@@ -6,8 +6,7 @@ from reportlab.pdfgen import canvas
 import qrcode
 from PIL import Image, ImageTk  
 from ddbb.consultas import buscar_por_dni_en_tto, verificar_turno_ocupado, verificar_horario_ocupado,guardar_turno_en_bd
-
-
+#--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
 SECONDARY = "#B794F4"
@@ -133,18 +132,10 @@ class Turnos_App(tk.Frame):
     def reservar_turno(self):   # -> Capturar los datos ingresados     
         horario = self.hora_var.get().strip()
         fecha = self.fecha_var.get().strip()
+
         if not horario:  # -> Si el campo está vacío, no mostrar advertencia de inmediato
             messagebox.showwarning("Advertencia", "Por favor, ingrese un Horario...")
             return  
-        #  # -> Verifica si el turno ya está ocupado
-        # if verificar_turno_ocupado(fecha, horario):
-        #     messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
-        #     return
-
-        # if not self.campos_cargados:
-        #     self.carga_datos()  # Crea los campos solo una vez
-        #     self.mostrar_campos_datos()
-        #     self.campos_cargados = True
 
         # ->  Obtiene los horarios ocupados en la fecha seleccionada
         horarios_ocupados = self.obtener_horarios_ocupados(fecha)
@@ -152,12 +143,6 @@ class Turnos_App(tk.Frame):
         # -> Actualiza el combobox con los horarios disponibles
         self.actualizar_horarios_combobox(horarios_ocupados)
         
-        # horario = self.hora_var.get().strip()
-        
-        # if not horario:
-        #     messagebox.showwarning("Advertencia", "Por favor, seleccione un horario.")
-        #     return
-
         # -> Verifica si el turno en la fecha y hora seleccionada ya está ocupado
         if horario in horarios_ocupados:
             messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
@@ -168,22 +153,12 @@ class Turnos_App(tk.Frame):
             self.mostrar_campos_datos()
             self.campos_cargados = True
 
-    def obtener_horarios_ocupados(self, fecha):
-        """
-        Obtiene los horarios ocupados para la fecha dada desde la base de datos.
-        Esta función debe ser implementada según tu lógica de base de datos.
-        """
-        # Aquí debes realizar la consulta a la base de datos para obtener los horarios ocupados
-        # En este ejemplo, supondremos que ya tienes una función que retorna los horarios ocupados
-        # Puedes usar algo similar a `verificar_turno_ocupado(fecha)`
+    def obtener_horarios_ocupados(self, fecha):      
         horarios_ocupados = verificar_horario_ocupado(fecha)  # Esta función debe devolver una lista de horarios ocupados
         
         return horarios_ocupados
     
-    def actualizar_horarios_combobox(self, horarios_ocupados):
-        """
-        Actualiza el combobox de horarios, desactivando los horarios ocupados.
-        """
+    def actualizar_horarios_combobox(self, horarios_ocupados): # ->  desactiva los horarios ocupados.
         horarios_disponibles = ["08:00", "09:30", "11:00", "12:30", "15:00", "16:30", "18:00"]
         
         # -> Filtra los horarios disponibles, excluyendo los ocupados
@@ -227,9 +202,9 @@ class Turnos_App(tk.Frame):
             self.cuadro_turno.delete(1.0, tk.END)    # ->  Limpia el cuadro de texto
             reserva_texto = f"~~~ Reserva Confirmada ~~~\n\n - Fecha: {fecha}\n - Horario: {horario}\n - Nombre: {nombre.title()} {apellido.title()}\n - DNI: {dni}\n\n~~~~~~~~~~~~~~~~~~~~~~"
             self.cuadro_turno.insert(tk.END, reserva_texto)
-            # messagebox.showinfo("Reserva Confirmada", "Su turno ha sido reservado correctamente.")
         else:
-            messagebox.showerror("Error", "No se pudo guardar el turno en la base de datos.")
+            messagebox.showerror("Error", "No se pudo guardar el turno en la base de datos.") 
+            
     
     def imprimir(self):
         contenido = self.cuadro_turno.get(1.0, tk.END).strip()

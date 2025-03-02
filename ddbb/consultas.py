@@ -245,14 +245,13 @@ def verificar_horario_ocupado(fecha):    # ->devuelve una lista de horarios ocup
     sql = "SELECT horario FROM turnos WHERE fecha = ?"
     
     try:        
-        # Consulta para obtener los horarios ocupados en la fecha seleccionada
+        # -> Consulta para obtener los horarios ocupados en la fecha seleccionada
         cone.cursor.execute(sql, (fecha,))
         resultados = cone.cursor.fetchall()  # Obtiene todos los horarios ocupados
         
-        # Convertir los resultados en una lista de horarios
+        # -> Convierte los resultados en una lista de horarios
         horarios_ocupados = [fila[0] for fila in resultados]
         
-        # Cerrar la conexión
         cone.conexion.close()
         
         return horarios_ocupados    
@@ -288,7 +287,6 @@ def guardar_turno_en_bd(dni, fecha, horario):
         cone.cerrar_conexion()
 #------------------------------------------
 def obtener_turnos_por_dni(dni):
-  
     cone = Conexion()
     sql = "SELECT FECHA, HORARIO FROM turnos WHERE DNI = ? ORDER BY FECHA, HORARIO"
 
