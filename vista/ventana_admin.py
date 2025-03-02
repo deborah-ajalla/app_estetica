@@ -6,6 +6,7 @@ from vista.ventana_tratamiento import Tratamiento_App
 from vista.ver_tratamientos import Ver_tratamientos
 from vista.ventana_turnos import Turnos_App
 from vista.ventana_buscar_turno import Buscar_Turnos
+from vista.ventana_agenda import Agenda
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -36,7 +37,7 @@ def menu_panel_admin(root):
     opciones_3.add_command (label= 'Cargar Nuevo', command= lambda: vista_turnos(root))
     opciones_3.add_command (label= 'Buscar', command= lambda: vista_buscar_turnos(root))
 
-    barra_menu.add_cascade (label='Agenda', menu=menu_inicio)
+    barra_menu.add_cascade (label='Agenda', command= lambda: vista_agenda(root))
     barra_menu.add_cascade (label='Stock', menu=menu_inicio)
     barra_menu.add_cascade (label='Salir', command=root.destroy)
 #--------------------------------
@@ -83,7 +84,6 @@ def ver_tratamientos(root):
     # instancia la Clase
     ventana_ver_tto = Ver_tratamientos(ventana_ver_tto)   
 #--------------------------------
-
 def vista_turnos(root):
     for widget in root.winfo_children():  # Verifica si ya hay un Frame cargado y lo destruye
         if isinstance(widget, tk.Frame):
@@ -104,8 +104,19 @@ def vista_buscar_turnos(root):
     frame_ventana_buscar_turnos.config(bg=PRIMARY)
     frame_ventana_buscar_turnos.place(x=0, y=0, width=1000, height=600) 
   
-    Buscar_Turnos (frame_ventana_buscar_turnos)    # instancia la Clase 
+    Buscar_Turnos (frame_ventana_buscar_turnos)    # -> instancia la Clase 
+#--------------------------------
+def vista_agenda(root):
+    for widget in root.winfo_children():  # -> Verifica si ya hay un Frame cargado y lo destruye
+        if isinstance(widget, tk.Frame):
+            widget.destroy()
 
+    frame_ventana_agenda = tk.Frame(root, bg= TITULOS)
+    frame_ventana_agenda.config(bg= TITULOS)
+    frame_ventana_agenda.place(x=0, y=0, width=1000, height=600)
+
+    Agenda (frame_ventana_agenda)   # -> instancia la Clase 
+#--------------------------------
 class Admin (tk.Frame):
     def __init__(self, root = None):
         super().__init__(root, width=1050, height=600, bg=PRIMARY)

@@ -59,14 +59,6 @@ class Buscar_Turnos(tk.Frame):
 
         paciente = listar_pacientes_por_dni(dni)
 
-        # if not hasattr(frame_turno, 'cuadro_turno'): # si no hay cuadro de texto -> lo crea
-           
-        #     self.cuadro_turno = tk.Text(frame_turno, height=11, width=40, padx= 30, pady= 30, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        #     self.cuadro_turno.place(x = 267, y = 240)
-        #     self.scrollbar_turno = tk.Scrollbar(frame_turno, command=self.cuadro_turno.yview) # Creo la barra de desplazamiento
-        #     self.scrollbar_turno.pack(side=tk.RIGHT, fill=tk.Y)
-        #     self.cuadro_turno.config(yscrollcommand= self.scrollbar_turno.set) # Configuro el cuadro de texto para que use la barra de desplazamiento
-
         # -> Si ya existe un frame, eliminarlo antes de crear uno nuevo
         if self.frame_turno:
             self.frame_turno.destroy()
@@ -159,16 +151,13 @@ class Buscar_Turnos(tk.Frame):
             return
     
         qr_img = qrcode.make(contenido)    #  -> Crea el código QR
-
         
         qr_img_path = "turno_qr.png"       #  -> Guarda el código QR en un archivo temporal
         qr_img.save(qr_img_path)
-
-       
+   
         img = Image.open(qr_img_path)      # -> Muestra el código QR en la interfaz
         img = img.resize((200, 200))       # -> Redimensiona la imagen para que encaje en la ventana
         self.qr_photo = ImageTk.PhotoImage(img)  # -> Convierte la imagen para Tkinter
-
       
         if hasattr(self, "qr_label"):          # -> Crea o actualiza el Label con la imagen QR
             self.qr_label.config(image=self.qr_photo)
