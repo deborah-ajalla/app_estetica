@@ -28,46 +28,46 @@ class Turnos_App(tk.Frame):
 
     def titulo(self):
         self.titulo = tk.Label(self, text= "✦ Gestión de Turnos ✦ ", font=("Nunito", 22, "bold"), bg=PRIMARY, fg=TITULOS)
-        self.titulo.place(x=320, y=30 ) 
+        self.titulo.place(x=320, y= 25 ) 
 
     def label(self):
         self.label_profesional = tk.Label(self, text = ' Profesional: ')
         self.label_profesional.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_profesional.place(x = 285, y = 90)
+        self.label_profesional.place(x = 315, y = 80)
 
         self.label_fecha = tk.Label(self, text = 'Fecha Disponible: ')
         self.label_fecha.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_fecha.place(x = 285, y = 125)
+        self.label_fecha.place(x = 315, y = 115)
 
         self.label_hora = tk.Label(self, text = 'Elegir Horario : ')
         self.label_hora.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_hora.place(x = 285, y = 160)
+        self.label_hora.place(x = 315, y = 150)
            
     def entry(self):
         self.profesionales = ["Deborah Ajalla", "Gimena Galarza"]   # -> Lista de profesionales disponibles 
         self.profesional_var = tk.StringVar()  # -> Variable para el horario seleccionado 
         self.combo_profesinales = ttk.Combobox(self, textvariable=self.profesional_var, values=self.profesionales, state="readonly") 
-        self.combo_profesinales.place(x = 550, y = 90)
+        self.combo_profesinales.place(x = 535, y = 80)
 
         self.fecha_var = tk.StringVar()
         self.fecha_disponible = tk.Entry(self, textvariable = self.fecha_var)
         self.fecha_disponible.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.fecha_disponible.place(x = 550, y = 125)
+        self.fecha_disponible.place(x = 535, y = 115)
   
         self.horarios = ["08:00", "09:30", "11:00", "12:30", "15:00", "16:30", "18:00"]   # -> Lista de horarios disponibles 
         self.hora_var = tk.StringVar()     # -> Variable para el horario seleccionado  
         self.combo_horarios = ttk.Combobox(self, textvariable=self.hora_var, values=self.horarios, state="readonly")   # -> Desplegable de horarios
-        self.combo_horarios.place(x = 550, y = 160)
+        self.combo_horarios.place(x = 535, y = 150)
 
     def boton_buscar_fecha(self):
         self.boton_buscar_fecha = tk.Button (self, text = 'Buscar', command= self.buscar_fecha_turno)
         self.boton_buscar_fecha.config(width = 12, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
-        self.boton_buscar_fecha.place(x = 345, y = 170)
+        self.boton_buscar_fecha.place(x = 355, y = 190)
 
     def boton_reservar(self):
         self.boton_reservar = tk.Button (self, text = 'Reservar', command= self.reservar_turno)
         self.boton_reservar.config(width = 12, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
-        self.boton_reservar.place(x = 495, y = 170)
+        self.boton_reservar.place(x = 505, y = 190)
 
     def carga_datos(self):
 

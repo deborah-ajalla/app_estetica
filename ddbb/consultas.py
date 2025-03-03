@@ -46,10 +46,14 @@ def crear_tabla():
               FOREIGN KEY (ID_PROFESIONAL) REFERENCES profesionales(ID_PROFESIONAL)
               );
 
-              CREATE TABLE profesionales (
+              CREATE TABLE IF NOT EXISTS profesionales (
               ID_PROFESIONAL INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
               NOMBRE TEXT NOT NULL,
-              APELLIDO TEXT NOT NULL
+              APELLIDO TEXT NOT NULL,
+              DNI INTEGER NOT NULL,
+              CEL INTEGER NOT NULL,
+              MAIL TEXT NOT NULL,
+              ESPECIALIDAD TEXT NOT NULL
               );
 
             """
@@ -59,10 +63,8 @@ def crear_tabla():
         print("Error al crear tablas:", e)
     finally:
         cone.cerrar_conexion()
-
 #------------------------------------------
 class Paciente():
-
     def __init__(self, nombre, apellido, dni, cel, mail):
         self.id_paciente = None
         self.nombre = nombre
@@ -324,7 +326,6 @@ def turno_ocupado_para_profesional(id_profesional, fecha, horario):
 #------------------------------------------
 def guardar_turno_en_bd(dni, fecha, horario, id_profesional):
     cone = Conexion()
-    # sql = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
 
     # -> Verifica si el turno ya está ocupado
     sql_verificar = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ?"""
@@ -382,3 +383,82 @@ def obtener_turnos_por_fecha(fecha):
         return []
     finally:
         cone.cerrar_conexion()
+#------------------------------------------
+class Profesional():
+    def __init__(self, nombre, apellido, dni, cel, mail, especialidad):
+        self.id_profesional = None
+        self.nombre = nombre
+        self.apellido = apellido
+        self.dni = dni
+        self.cel = cel
+        self.mail = mail
+        self.especialidad = especialidad
+
+    def __str__(self):
+        return f'Profesional[{self.nombre}, {self.apellido}, {self.dni}, {self.cel}, {self.mail}, {self.especialidad}]'
+#------------------------------------------
+def guardar_profesional(profesional):
+    cone = Conexion()
+
+    sql= f'''
+             INSERT INTO profesionales (Nombre,Apellido,Dni, Celular, Mail, Especialidad)
+             VALUES('{profesional.nombre}','{profesional.apellido}','{profesional.dni}','{profesional.cel}','{profesional.mail}'), '{profesional.especialidad};
+        '''
+    try:
+        cone.cursor.execute(sql)
+    except:
+        pass
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def listar_profesionales():
+    cone = Conexion()
+    listar_profesionales = []
+   
+    sql = f'''
+            SELECT * FROM profesionales as p
+           
+          '''
+    try:
+        cone.cursor.execute(sql)
+        listar_profesionales = cone.cursor.fetchall()
+
+        return listar_profesionales
+    except:
+        pass
+    finally:
+       cone.cerrar_conexion()
+#------------------------------------------
+def editar_profesional(profesional, id):
+    cone = Conexion()
+
+    sql= f"""
+            UPDATE pacientes
+            SET NOMBRE = ?,
+            APELLIDO = ?,
+            DNI = ?,
+            CELULAR = ?,
+            MAIL = ?,
+            ESPECIALIDAD = ?
+            WHERE ID = ?;
+        """
+    try:
+        cone.cursor.execute(sql, (profesional.nombre, profesional.apellido,profesional.dni, profesional.cel,profesional.mail, profesional.especialidad,id))
+        cone.cerrar_conexion()
+        # cone.cursor.commit()
+    except:
+        pass
+#------------------------------------------
+def borrar_profesional(id):
+    cone = Conexion()
+
+    sql= f'''
+         DELETE FROM profesionales WHERE ID = {id};
+         '''
+    try:
+        cone.cursor.execute(sql)
+    except:
+        pass
+    finally:
+        cone.cerrar_conexion()
+
