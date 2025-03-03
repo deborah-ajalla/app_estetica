@@ -41,10 +41,18 @@ def crear_tabla():
               DNI TEXT NOT NULL,
               FECHA TEXT NOT NULL,
               HORARIO TEXT NOT NULL,
-              FOREIGN KEY (DNI) REFERENCES pacientes(DNI)
+              ID_PROFESIONAL INTEGER NOT NULL,
+              FOREIGN KEY (DNI) REFERENCES pacientes(DNI),
+              FOREIGN KEY (ID_PROFESIONAL) REFERENCES profesionales(ID_PROFESIONAL)
               );
 
-           """
+              CREATE TABLE profesionales (
+              ID_PROFESIONAL INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              NOMBRE TEXT NOT NULL,
+              APELLIDO TEXT NOT NULL
+              );
+
+            """
     try:
         cone.cursor.executescript(sql)
     except Exception as e:
@@ -259,14 +267,68 @@ def verificar_horario_ocupado(fecha):    # ->devuelve una lista de horarios ocup
         print(f"Error al consultar la base de datos: {e}")
         return []
 #------------------------------------------
-def guardar_turno_en_bd(dni, fecha, horario):
-   
+def obtener_id_profesional(nombre, apellido):  # -> obtiene el ID del profesional según su nombre y apellido
     cone = Conexion()
-    sql = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
+    sql = """SELECT ID_PROFESIONAL FROM profesionales WHERE NOMBRE = ? AND APELLIDO = ?"""
+    
+    try:
+        cone.cursor.execute(sql, (nombre, apellido))  # ->  Ejecuta la consulta con los parámetros de nombre y apellido
+        resultado = cone.cursor.fetchone()
+        
+        if resultado:  # -> Si encuentra un resultado, devuelve el ID
+            return resultado[0]
+        else:
+            return None  # ->  Si no se encuentra, devuelve None 
+    
+    except sqlite3.Error as e:
+        print("Error al obtener el ID del profesional:", e)
+        return None 
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def obtener_nombre_apellido_profesional(id_profesional):   # -> obtiene nombre y apellido del profesional por su ID
+    cone = Conexion()
+    sql = """SELECT NOMBRE, APELLIDO FROM profesionales WHERE ID_PROFESIONAL = ?"""
+    
+    try:
+        cone.cursor.execute(sql, (id_profesional,))
+        resultado= cone.cursor.fetchone()
+        
+        if resultado:
+            return resultado[0], resultado[1]  # Devuelve nombre y apellido
+        else:
+            return None, None  # Si no encuentra, retorna None, None
+    
+    except sqlite3.Error as e:
+        print("Error al obtener el nombre y apellido del profesional:", e)
+        return None, None
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def turno_ocupado_para_profesional(id_profesional, fecha, horario):
+    cone = Conexion()  
+    sql = """SELECT COUNT(*) FROM turnos 
+             WHERE id_profesional = ? AND fecha = ? AND horario = ?"""
+    
+    try:
+        cone.cursor.execute(sql, (id_profesional, fecha, horario))
+        resultado = cone.cursor.fetchone()
+        if resultado[0] > 0:  # ->  Si la cantidad de turnos reservados es mayor que 0, significa que ya está ocupado
+            return True
+        return False
+    except sqlite3.Error as e:
+        print("Error al verificar turno ocupado para el profesional:", e)
+        return True  # -> Asume que está ocupado en caso de error
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def guardar_turno_en_bd(dni, fecha, horario, id_profesional):
+    cone = Conexion()
+    # sql = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
 
     # -> Verifica si el turno ya está ocupado
     sql_verificar = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ?"""
-    sql_insertar = """INSERT INTO turnos (DNI, FECHA, HORARIO) VALUES (?, ?, ?)"""
+    sql_insertar = """INSERT INTO turnos (DNI, FECHA, HORARIO, ID_PROFESIONAL) VALUES (?, ?, ?, ?)"""
     
     try:
         cone.cursor.execute(sql_verificar, (fecha, horario))
@@ -276,7 +338,7 @@ def guardar_turno_en_bd(dni, fecha, horario):
             return False  # -> No se puede reservar el turno
         
         # -> Si el turno está disponible, lo guarda en la base de datos
-        cone.cursor.execute(sql_insertar, (dni, fecha, horario))
+        cone.cursor.execute(sql_insertar, (dni, fecha, horario, id_profesional))
         cone.conexion.commit()
         return True  # -> Retorna True si la inserción fue exitosa
       
@@ -293,6 +355,27 @@ def obtener_turnos_por_dni(dni):
     try:
         cone.cursor.execute(sql, (dni,))
         turnos = cone.cursor.fetchall()  # -> Lista de tuplas con (fecha, horario)
+        return turnos
+    except sqlite3.Error as e:
+        print("Error al obtener los turnos:", e)
+        return []
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def obtener_turnos_por_fecha(fecha):
+    cone = Conexion()
+    sql = """
+                SELECT t.HORARIO, p.NOMBRE, p.APELLIDO, 
+                       prof.NOMBRE AS PROFESIONAL_NOMBRE, prof.APELLIDO AS PROFESIONAL_APELLIDO
+                FROM turnos t
+                JOIN pacientes p ON t.DNI = p.DNI
+                JOIN profesionales prof ON t.ID_PROFESIONAL = prof.ID_PROFESIONAL
+                WHERE t.FECHA = ?
+                ORDER BY t.HORARIO              
+          """   
+    try:
+        cone.cursor.execute(sql, (fecha,))
+        turnos = cone.cursor.fetchall()  # -> Lista de tuplas con (fecha, horario, nombre, apellido)
         return turnos
     except sqlite3.Error as e:
         print("Error al obtener los turnos:", e)

@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import qrcode
 from PIL import Image, ImageTk  
-from ddbb.consultas import buscar_por_dni_en_tto, verificar_turno_ocupado, verificar_horario_ocupado,guardar_turno_en_bd
+from ddbb.consultas import buscar_por_dni_en_tto, verificar_horario_ocupado, obtener_id_profesional, obtener_nombre_apellido_profesional, turno_ocupado_para_profesional, guardar_turno_en_bd
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -31,26 +31,33 @@ class Turnos_App(tk.Frame):
         self.titulo.place(x=320, y=30 ) 
 
     def label(self):
+        self.label_profesional = tk.Label(self, text = ' Profesional: ')
+        self.label_profesional.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
+        self.label_profesional.place(x = 285, y = 90)
+
         self.label_fecha = tk.Label(self, text = 'Fecha Disponible: ')
         self.label_fecha.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_fecha.place(x = 285, y = 90)
+        self.label_fecha.place(x = 285, y = 125)
 
         self.label_hora = tk.Label(self, text = 'Elegir Horario : ')
         self.label_hora.config(bg=PRIMARY, fg=BOTONES, font= ("Nunito", 14, "bold"))
-        self.label_hora.place(x = 285, y = 125)
+        self.label_hora.place(x = 285, y = 160)
            
     def entry(self):
+        self.profesionales = ["Deborah Ajalla", "Gimena Galarza"]   # -> Lista de profesionales disponibles 
+        self.profesional_var = tk.StringVar()  # -> Variable para el horario seleccionado 
+        self.combo_profesinales = ttk.Combobox(self, textvariable=self.profesional_var, values=self.profesionales, state="readonly") 
+        self.combo_profesinales.place(x = 550, y = 90)
+
         self.fecha_var = tk.StringVar()
         self.fecha_disponible = tk.Entry(self, textvariable = self.fecha_var)
         self.fecha_disponible.config(width = 15, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.fecha_disponible.place(x = 550, y = 90)
+        self.fecha_disponible.place(x = 550, y = 125)
   
         self.horarios = ["08:00", "09:30", "11:00", "12:30", "15:00", "16:30", "18:00"]   # -> Lista de horarios disponibles 
-
-        self.hora_var = tk.StringVar()     # Variable para el horario seleccionado
-    
+        self.hora_var = tk.StringVar()     # -> Variable para el horario seleccionado  
         self.combo_horarios = ttk.Combobox(self, textvariable=self.hora_var, values=self.horarios, state="readonly")   # -> Desplegable de horarios
-        self.combo_horarios.place(x = 550, y = 125)
+        self.combo_horarios.place(x = 550, y = 160)
 
     def boton_buscar_fecha(self):
         self.boton_buscar_fecha = tk.Button (self, text = 'Buscar', command= self.buscar_fecha_turno)
@@ -129,13 +136,25 @@ class Turnos_App(tk.Frame):
         fecha_disponible = fecha_actual + datetime.timedelta(days=3)  # -> Ej: Primera fecha disponible en 3 días
         self.fecha_var.set(fecha_disponible.strftime("%d/%m/%Y"))     # -> inserta en el 
 
-    def reservar_turno(self):   # -> Capturar los datos ingresados     
+    def reservar_turno(self):     
         horario = self.hora_var.get().strip()
         fecha = self.fecha_var.get().strip()
 
         if not horario:  # -> Si el campo está vacío, no mostrar advertencia de inmediato
             messagebox.showwarning("Advertencia", "Por favor, ingrese un Horario...")
             return  
+        
+        # -> Valida si la fecha ingresada es pasada
+        fecha_actual = datetime.datetime.today().date()  #->  Obtiene la fecha de hoy
+        try:
+            fecha_seleccionada = datetime.datetime.strptime(fecha, "%d/%m/%Y").date()  # -> Convierte la fecha del Entry a formato date
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha inválido. Use DD/MM/YYYY.")
+            return
+
+        if fecha_seleccionada < fecha_actual:
+            messagebox.showwarning("Fecha Inválida", "No puede reservar un turno en una fecha pasada...")
+            return
 
         # ->  Obtiene los horarios ocupados en la fecha seleccionada
         horarios_ocupados = self.obtener_horarios_ocupados(fecha)
@@ -146,6 +165,35 @@ class Turnos_App(tk.Frame):
         # -> Verifica si el turno en la fecha y hora seleccionada ya está ocupado
         if horario in horarios_ocupados:
             messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
+            return
+        
+        # -> Verifica si el profesional ya tiene un turno reservado para ese horario
+        profesional = self.profesional_var.get().strip()
+
+        #  -> Verifica si se ha seleccionado un profesional
+        if not profesional:
+            messagebox.showwarning("Advertencia", "Seleccione un profesional antes de continuar.")
+            return
+
+        # -> Separa nombre y apellido asegurando que hay dos partes
+        partes = profesional.split()
+
+        if len(partes) != 2:  # -> Esto evita errores si hay más o menos de dos palabras
+            messagebox.showerror("Error", "Formato del nombre del profesional incorrecto.")
+            return
+        
+        nombre_profesional, apellido_profesional = partes
+        
+        # Obtiene el ID del profesional
+        id_profesional = obtener_id_profesional(nombre_profesional, apellido_profesional)
+        
+        if id_profesional is None:
+            messagebox.showerror("Error", "No se encontró el profesional en la base de datos.")
+            return
+        
+        # Verifica si el profesional ya tiene un turno reservado para ese horario
+        if turno_ocupado_para_profesional(id_profesional, fecha, horario):
+            messagebox.showwarning("Profesional Ocupado", f"El profesional {profesional} ya tiene un turno a esta hora.")
             return
 
         if not self.campos_cargados:
@@ -191,16 +239,29 @@ class Turnos_App(tk.Frame):
         nombre = self.nombre_turno_var.get()
         apellido = self.apellido_turno_var.get()
         dni = self.dni_var.get()
+        profesional = self.profesional_var.get()
         fecha = self.fecha_var.get()
-        horario = self.hora_var.get()
+        horario = self.hora_var.get() 
        
-        if not (nombre and apellido and dni and fecha and horario): # -> Valida que todos los datos estén completos
+        if not (nombre and apellido and dni and profesional and fecha and horario): # -> Valida que todos los datos estén completos
             messagebox.showwarning("Datos incompletos", "Por favor, complete todos los campos antes de reservar.")
             return
+        
+        nombre_profesional, apellido_profesional = profesional.split()  # Asumiendo que es 'nombre apellido'
+        
+        # -> Obtiene el ID del profesional
+        id_profesional = obtener_id_profesional(nombre_profesional, apellido_profesional)
+        
+        if id_profesional is None:
+            messagebox.showerror("Error", "No se encontró el profesional en la base de datos.")
+            return
            
-        if guardar_turno_en_bd(dni, fecha, horario): # -> Guarda en la BD
+        if guardar_turno_en_bd(dni, fecha, horario, id_profesional): # -> Guarda en la BD
+
+            # -> Obtiene el nombre y apellido del profesional
+            nombre_prof, apellido_prof = obtener_nombre_apellido_profesional(id_profesional)
             self.cuadro_turno.delete(1.0, tk.END)    # ->  Limpia el cuadro de texto
-            reserva_texto = f"~~~ Reserva Confirmada ~~~\n\n - Fecha: {fecha}\n - Horario: {horario}\n - Nombre: {nombre.title()} {apellido.title()}\n - DNI: {dni}\n\n~~~~~~~~~~~~~~~~~~~~~~"
+            reserva_texto = f"~~~ Reserva Confirmada ~~~\n\n - Fecha: {fecha}\n - Horario: {horario}\n - Nombre: {nombre.title()} {apellido.title()}\n - DNI: {dni}\n - Profesional: {nombre_prof} {apellido_prof}\n\n~~~~~~~~~~~~~~~~~~~~~~"
             self.cuadro_turno.insert(tk.END, reserva_texto)
         else:
             messagebox.showerror("Error", "No se pudo guardar el turno en la base de datos.") 
