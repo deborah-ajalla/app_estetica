@@ -491,4 +491,54 @@ def guardar_producto(producto):
     finally:
         cone.cerrar_conexion()
 #------------------------------------------
+def listar_productos():
+    cone = Conexion()
+    listar_productos = []
+   
+    sql = f'''
+            SELECT * FROM productos as p
+           
+          '''
+    try:
+        cone.cursor.execute(sql)
+        listar_productos = cone.cursor.fetchall()
+
+        return listar_productos
+    except Exception as e:
+        print(f"Error al obtener productos: {e}")
+    finally:
+       cone.cerrar_conexion()
 #------------------------------------------
+def editar_producto_en_bd(producto, id):
+    cone = Conexion()   
+    
+    sql= f"""
+         UPDATE productos
+         SET CODIGO = ?,
+         NOMBRE = ?,
+         PRECIO = ?,
+         CANTIDAD = ?
+    
+         WHERE ID_PRODUCTOS = ?;
+"""
+    try:
+        cone.cursor.execute(sql, (producto.codigo, producto.nombre, producto.precio, producto.cantidad, id))
+       
+    except Exception as e:
+        print(f"Error al obtener productos: {e}")
+    finally:
+        cone.cerrar_conexion()
+
+#------------------------------------------
+def borrar_producto(id):
+    cone = Conexion()
+
+    sql= f'''
+         DELETE FROM productos WHERE ID_PRODUCTOS = {id};
+         '''
+    try:
+        cone.cursor.execute(sql)
+    except  Exception as e:
+        print(f"Error al borrar producto: {e}")  # Mostrar error en consola
+    finally:
+        cone.cerrar_conexion()
