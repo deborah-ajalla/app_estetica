@@ -31,8 +31,11 @@ def crear_tabla():
 
               CREATE TABLE IF NOT EXISTS productos
              (
-              ID INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
-              NOMBRE TEXT NOT NULL        
+              ID_PRODUCTOS INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
+              CODIGO INTEGER NOT NULL,
+              NOMBRE TEXT NOT NULL,
+              PRECIO INTEGER NOT NULL,
+              CANTIDAD TEXT NOT NULL        
               );
 
                CREATE TABLE IF NOT EXISTS turnos
@@ -461,4 +464,31 @@ def borrar_profesional(id):
         print(f"Error al borrar profesional: {e}")  # Mostrar error en consola
     finally:
         cone.cerrar_conexion()
+#------------------------------------------
+class Producto():
+    def __init__(self,codigo, nombre, precio,cantidad):
+        self.id_producto = None
+        self.codigo = codigo
+        self.nombre = nombre
+        self.precio = precio
+        self.cantidad = cantidad
+        
 
+    def __str__(self):
+        return f'Producto[{self.codigo}, {self.nombre}, {self.precio}, {self.cantidad}]'
+#------------------------------------------
+def guardar_producto(producto):
+    cone = Conexion()
+
+    sql= f'''
+             INSERT INTO productos (Codigo, Nombre, Precio, Cantidad)
+             VALUES('{producto.codigo}','{producto.nombre}','{producto.precio}','{producto.cantidad}');
+        '''
+    try:
+        cone.cursor.execute(sql)
+    except  Exception as e:
+        print(f"Error al guardar producto: {e}")  # Mostrar error en consola
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+#------------------------------------------

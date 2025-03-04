@@ -8,6 +8,7 @@ from vista.ventana_turnos import Turnos_App
 from vista.ventana_buscar_turno import Buscar_Turnos
 from vista.ventana_agenda import Agenda
 from vista.ventana_profesionales import Profesionales
+from vista.ventana_stock import Productos
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -41,7 +42,7 @@ def menu_panel_admin(root):
     opciones_3.add_command (label= 'Buscar', command= lambda: vista_buscar_turnos(root))
 
     barra_menu.add_cascade (label='Agenda', command= lambda: vista_agenda(root))
-    barra_menu.add_cascade (label='Stock', menu=menu_inicio)
+    barra_menu.add_cascade (label='Productos', command= lambda: vista_productos(root))
     barra_menu.add_cascade (label='Salir', command=root.destroy)
 #--------------------------------
 def vista_paciente (root):
@@ -67,7 +68,6 @@ def vista_buscar(root):
     ventana_buscar = Buscar(ventana_buscar)      
 #--------------------------------
 def vista_profesionales(root):
- 
     for widget in root.winfo_children():  # Verifica si ya hay un Frame cargado y lo destruye
         if isinstance(widget, tk.Frame):
             widget.destroy()
@@ -76,6 +76,16 @@ def vista_profesionales(root):
     frame_ventana_profesionales.place(x=0, y=0, width=1000, height=600) 
     
     Profesionales (frame_ventana_profesionales)    # instancia la Clase 
+#--------------------------------
+def vista_productos(root):
+    for widget in root.winfo_children():  # Verifica si ya hay un Frame cargado y lo destruye
+        if isinstance(widget, tk.Frame):
+            widget.destroy()
+    frame_ventana_productos = tk.Frame(root, bg=PRIMARY)
+    frame_ventana_productos.config(bg=PRIMARY)
+    frame_ventana_productos.place(x=0, y=0, width=1000, height=600) 
+    
+    Productos (frame_ventana_productos)    # instancia la Clase 
 #--------------------------------
 def vista_tratamiento(root):
     for widget in root.winfo_children():  # Verifica si ya hay un Frame cargado y lo destruye
