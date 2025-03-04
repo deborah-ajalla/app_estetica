@@ -30,7 +30,7 @@ def menu_panel_admin(root):
     opciones_1.add_command(label= 'Cargar Nuevo', command=lambda: vista_paciente(root))
     opciones_1.add_command(label= 'Buscar', command= lambda: vista_buscar(root)) 
 
-    barra_menu.add_cascade (label='Profesionales', menu=opciones_4, command= lambda: vista_profesionales(root))   # -> pestaña profesionales
+    barra_menu.add_cascade (label='Profesionales', command= lambda: vista_profesionales(root))   # -> pestaña profesionales
    
     barra_menu.add_cascade (label='Tratamientos', menu=opciones_2)
     opciones_2.add_command (label= 'Cargar Nuevo', command= lambda: vista_tratamiento(root))

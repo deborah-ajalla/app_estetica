@@ -16,6 +16,9 @@ class Profesionales(tk.Frame):
 
         self.titulo()
         self.carga_datos()
+        self.botones()
+        self.bloquear_campos()
+        self.mostrar_tabla()
 
     def titulo(self):
         self.etiqueta_titulo = tk.Label(self, text= "✦ Profesionales ✦ ", font=("Nunito", 24,  "bold"), fg=TITULOS, bg=PRIMARY)
@@ -25,58 +28,58 @@ class Profesionales(tk.Frame):
         # -> Labels
         self.nombre_prof = tk.Label(self, text = 'Nombre: ')
         self.nombre_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.nombre_prof.place(x = 100, y = 110)
+        self.nombre_prof.place(x = 175, y = 110)
 
         self.apellido_prof = tk.Label(self, text = 'Apellido: ')
         self.apellido_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.apellido_prof.place(x = 100, y = 150)
+        self.apellido_prof.place(x = 175, y = 150)
 
         self.dni_prof = tk.Label(self, text = 'Dni: ')
         self.dni_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.dni_prof.place(x = 100, y = 190)
+        self.dni_prof.place(x = 175, y = 190)
 
         self.cel_prof = tk.Label(self, text = 'Celular: ')
         self.cel_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.cel_prof.place(x = 520, y = 110)
+        self.cel_prof.place(x = 500, y = 110)
 
         self.mail_prof = tk.Label(self, text = 'Email : ')
         self.mail_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.mail_prof.place(x = 520, y = 150)
+        self.mail_prof.place(x = 500, y = 150)
 
-        self.especialidad_prof = tk.Label(self, text = 'Email : ')
+        self.especialidad_prof = tk.Label(self, text = 'Especialidad : ')
         self.especialidad_prof.config(bg=PRIMARY,fg=TITULOS,font= ("Nunito", 15, "bold"))
-        self.especialidad_prof.place(x = 520, y = 190)
+        self.especialidad_prof.place(x = 500, y = 190)
 
         # -> Entrys
         self.nombre_var = tk.StringVar()
         self.entry_nombre_prof = tk.Entry(self, textvariable = self.nombre_var)
-        self.entry_nombre_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_nombre_prof.place(x = 200, y = 110)
+        self.entry_nombre_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_nombre_prof.place(x = 275, y = 110)
 
         self.apellido_var = tk.StringVar()
         self.entry_apellido_prof = tk.Entry(self, textvariable = self.apellido_var)
-        self.entry_apellido_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_apellido_prof.place(x = 200, y = 150)
+        self.entry_apellido_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_apellido_prof.place(x = 275, y = 150)
 
         self.dni_var = tk.StringVar()
         self.entry_dni_prof = tk.Entry(self, textvariable = self.dni_var)
-        self.entry_dni_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_dni_prof.place(x = 200, y = 190)
+        self.entry_dni_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_dni_prof.place(x = 275, y = 190)
 
         self.cel_var = tk.StringVar()
         self.entry_cel_prof = tk.Entry(self, textvariable = self.cel_var)
-        self.entry_cel_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_cel_prof.place(x = 620, y = 110)
+        self.entry_cel_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_cel_prof.place(x = 640, y = 110)
 
         self.mail_var = tk.StringVar()
         self.entry_mail_prof = tk.Entry(self, textvariable = self.mail_var)
-        self.entry_mail_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_mail_prof.place(x = 620, y = 150)
+        self.entry_mail_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_mail_prof.place(x = 640, y = 150)
 
         self.especialidad_var = tk.StringVar()
         self.entry_especialidad_prof = tk.Entry(self, textvariable=self.especialidad_var)
-        self.entry_especialidad_prof.config(width = 28, font = ('Arial', '12', 'bold'), fg=BOTONES)
-        self.entry_especialidad_prof.place(x = 620, y = 190)
+        self.entry_especialidad_prof.config(width = 20, font = ('Arial', '12', 'bold'), fg=BOTONES)
+        self.entry_especialidad_prof.place(x = 640, y = 190)
 #-----------------------------------------------
     def botones(self):
         self.boton_nuevo = tk.Button (self, text = 'Nuevo', command = self.habilitar_campos)
@@ -190,12 +193,12 @@ class Profesionales(tk.Frame):
 
              self.habilitar_campos()
 
-             self.nombre.set(self.nombre_profesional)
-             self.apellido.set(self.apellido_profesional)
-             self.dni.set (self.dni_profesional)
-             self.cel.set(self.cel_profesional)
-             self.mail.set(self.mail_profesional)
-             self.especialidad.set (self.especialidad_profesional)
+             self.nombre_var.set(self.nombre_profesional)
+             self.apellido_var.set(self.apellido_profesional)
+             self.dni_var.set (self.dni_profesional)
+             self.cel_var.set(self.cel_profesional)
+             self.mail_var.set(self.mail_profesional)
+             self.especialidad_var.set (self.especialidad_profesional)
 
         except:
              pass  

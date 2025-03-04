@@ -401,13 +401,13 @@ def guardar_profesional(profesional):
     cone = Conexion()
 
     sql= f'''
-             INSERT INTO profesionales (Nombre,Apellido,Dni, Celular, Mail, Especialidad)
-             VALUES('{profesional.nombre}','{profesional.apellido}','{profesional.dni}','{profesional.cel}','{profesional.mail}'), '{profesional.especialidad};
+             INSERT INTO profesionales (NOMBRE, APELLIDO, DNI, CEL, MAIL, ESPECIALIDAD)
+             VALUES('{profesional.nombre}','{profesional.apellido}','{profesional.dni}','{profesional.cel}','{profesional.mail}', '{profesional.especialidad}')
         '''
     try:
         cone.cursor.execute(sql)
-    except:
-        pass
+    except  Exception as e:
+        print(f"Error al guardar profesional: {e}")  # Mostrar error en consola
     finally:
         cone.cerrar_conexion()
 #------------------------------------------
@@ -424,8 +424,8 @@ def listar_profesionales():
         listar_profesionales = cone.cursor.fetchall()
 
         return listar_profesionales
-    except:
-        pass
+    except  Exception as e:
+        print(f"Error al listar: {e}")  # Mostrar error en consola
     finally:
        cone.cerrar_conexion()
 #------------------------------------------
@@ -433,32 +433,32 @@ def editar_profesional(profesional, id):
     cone = Conexion()
 
     sql= f"""
-            UPDATE pacientes
+            UPDATE profesionales
             SET NOMBRE = ?,
             APELLIDO = ?,
             DNI = ?,
-            CELULAR = ?,
+            CEL = ?,
             MAIL = ?,
             ESPECIALIDAD = ?
-            WHERE ID = ?;
+            WHERE ID_PROFESIONAL = ?;
         """
     try:
         cone.cursor.execute(sql, (profesional.nombre, profesional.apellido,profesional.dni, profesional.cel,profesional.mail, profesional.especialidad,id))
         cone.cerrar_conexion()
         # cone.cursor.commit()
-    except:
-        pass
+    except  Exception as e:
+        print(f"Error al editar profesional: {e}")  # Mostrar error en consola
 #------------------------------------------
 def borrar_profesional(id):
     cone = Conexion()
 
     sql= f'''
-         DELETE FROM profesionales WHERE ID = {id};
+         DELETE FROM profesionales WHERE ID_PROFESIONAL = {id};
          '''
     try:
         cone.cursor.execute(sql)
-    except:
-        pass
+    except  Exception as e:
+        print(f"Error al borrar profesional: {e}")  # Mostrar error en consola
     finally:
         cone.cerrar_conexion()
 

@@ -116,7 +116,7 @@ class Agenda(tk.Frame):
         self.label_paciente_2.place(x= 180, y= 355)
 
         self.label_profesional_2 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_2.place(x= 180, y= 375)
+        self.label_profesional_2.place(x= 180, y= 380)
 
         self.label_divisor_2 = tk.Label(self, text = " _____________________ ", font=("Nunito", 12, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
         self.label_divisor_2.place(x= 180, y= 400)
@@ -149,7 +149,7 @@ class Agenda(tk.Frame):
         self.label_paciente_5.place(x= 554, y= 355)
 
         self.label_profesional_5 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_5.place(x= 554, y= 375)
+        self.label_profesional_5.place(x= 554, y= 380)
 
         self.label_divisor_5 = tk.Label(self, text = " _____________________ ", font=("Nunito", 12, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
         self.label_divisor_5.place(x= 554, y= 400)
