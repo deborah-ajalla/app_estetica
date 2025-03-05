@@ -59,9 +59,9 @@ class Agenda(tk.Frame):
         self.label_paciente_encontrado_2.place(x=270, y= 355)
         self.label_profesional_encontrado_2.place(x= 290, y= 385)
 
-        self.label_horario_encontrado_3.place(x= 240, y= 430)
-        self.label_paciente_encontrado_3.place(x=270, y= 455)
-        self.label_profesional_encontrado_3.place(x= 290, y= 480)
+        self.label_horario_encontrado_3.place(x= 240, y= 435)
+        self.label_paciente_encontrado_3.place(x=270, y= 460)
+        self.label_profesional_encontrado_3.place(x= 290, y= 485)
 
         self.label_horario_encontrado_4.place(x= 607, y= 220)
         self.label_paciente_encontrado_4.place(x= 639, y= 245)
@@ -71,9 +71,9 @@ class Agenda(tk.Frame):
         self.label_paciente_encontrado_5.place(x= 641, y= 355)
         self.label_profesional_encontrado_5.place(x= 661, y= 385)
 
-        self.label_horario_encontrado_6.place(x= 607, y= 430)
-        self.label_paciente_encontrado_6.place(x= 641, y= 455)
-        self.label_profesional_encontrado_6.place(x= 661, y= 480)
+        self.label_horario_encontrado_6.place(x= 607, y= 435)
+        self.label_paciente_encontrado_6.place(x= 641, y= 460)
+        self.label_profesional_encontrado_6.place(x= 661, y= 485)
 
     def titulo(self):
         self.titulo = tk.Label(self, text= "✦ Agenda ✦ ", font=("Nunito", 22, "bold"), bg='#d33393', fg="white")
@@ -116,19 +116,19 @@ class Agenda(tk.Frame):
         self.label_paciente_2.place(x= 180, y= 355)
 
         self.label_profesional_2 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_2.place(x= 180, y= 380)
+        self.label_profesional_2.place(x= 180, y= 385)
 
         self.label_divisor_2 = tk.Label(self, text = " _____________________ ", font=("Nunito", 12, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_divisor_2.place(x= 180, y= 400)
+        self.label_divisor_2.place(x= 180, y= 405)
 
         self.label_horario_3 = tk.Label(self, text = " Hora: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_horario_3.place(x= 180, y= 430)
+        self.label_horario_3.place(x= 180, y= 435)
 
         self.label_paciente_3 = tk.Label(self, text = " Paciente: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_paciente_3.place(x= 180, y= 455)
+        self.label_paciente_3.place(x= 180, y= 460)
 
         self.label_profesional_3 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_3.place(x= 180, y= 480)
+        self.label_profesional_3.place(x= 180, y= 485)
 
         self.label_horario_4 = tk.Label(self, text = " Hora: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
         self.label_horario_4.place(x= 552, y= 220)
@@ -143,25 +143,25 @@ class Agenda(tk.Frame):
         self.label_divisor_3.place(x= 552, y= 290)
 
         self.label_horario_5 = tk.Label(self, text = " Hora: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_horario_5.place(x= 554, y= 330)
+        self.label_horario_5.place(x= 554, y= 335)
 
         self.label_paciente_5 = tk.Label(self, text = " Paciente: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_paciente_5.place(x= 554, y= 355)
+        self.label_paciente_5.place(x= 554, y= 360)
 
         self.label_profesional_5 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_5.place(x= 554, y= 380)
+        self.label_profesional_5.place(x= 554, y= 385)
 
         self.label_divisor_5 = tk.Label(self, text = " _____________________ ", font=("Nunito", 12, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_divisor_5.place(x= 554, y= 400)
+        self.label_divisor_5.place(x= 554, y= 405)
 
         self.label_horario_6 = tk.Label(self, text = " Hora: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_horario_6.place(x= 556, y= 430)
+        self.label_horario_6.place(x= 556, y= 435)
 
         self.label_paciente_6 = tk.Label(self, text = " Paciente: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_paciente_6.place(x= 556, y= 455)
+        self.label_paciente_6.place(x= 556, y= 460)
 
         self.label_profesional_6 = tk.Label(self, text = " Profesional: ", font=("Nunito", 13, "bold"), bg= '#c7c7c7' ,fg= '#d33393')
-        self.label_profesional_6.place(x= 556, y= 480)
+        self.label_profesional_6.place(x= 556, y= 485)
   
     def mostrar_turnos(self):
         fecha = self.fecha_var.get().strip()  # -> Obtiene la fecha del Entry

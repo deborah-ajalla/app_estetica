@@ -272,24 +272,48 @@ def verificar_horario_ocupado(fecha):    # ->devuelve una lista de horarios ocup
         print(f"Error al consultar la base de datos: {e}")
         return []
 #------------------------------------------
-def obtener_id_profesional(nombre, apellido):  # -> obtiene el ID del profesional según su nombre y apellido
-    cone = Conexion()
-    sql = """SELECT ID_PROFESIONAL FROM profesionales WHERE NOMBRE = ? AND APELLIDO = ?"""
+# def obtener_id_profesional(nombre, apellido):  # -> obtiene el ID del profesional según su nombre y apellido
+#     cone = Conexion()
+#     sql = """SELECT ID_PROFESIONAL FROM profesionales WHERE NOMBRE = ? AND APELLIDO = ?"""
     
+#     try:
+#         cone.cursor.execute(sql, (nombre, apellido))  # ->  Ejecuta la consulta con los parámetros de nombre y apellido
+#         resultado = cone.cursor.fetchone()
+        
+#         if resultado:  # -> Si encuentra un resultado, devuelve el ID
+#             return resultado[0]
+#         else:
+#             return None  # ->  Si no se encuentra, devuelve None 
+    
+#     except sqlite3.Error as e:
+#         print("Error al obtener el ID del profesional:", e)
+#         return None 
+#     finally:
+#         cone.cerrar_conexion()
+def obtener_id_profesional(nombre, apellido):
+    cone = Conexion()
     try:
-        cone.cursor.execute(sql, (nombre, apellido))  # ->  Ejecuta la consulta con los parámetros de nombre y apellido
+        nombre = nombre.strip()  # Elimina espacios antes y después
+        apellido = apellido.strip()
+        
+        #print(f"Buscando profesional: '{nombre}' '{apellido}'")   ->> Debug que me encuentre el profesional
+        
+        sql = "SELECT ID_PROFESIONAL FROM profesionales WHERE TRIM(NOMBRE) = TRIM(?) AND TRIM(APELLIDO) = TRIM(?)"
+        cone.cursor.execute(sql, (nombre, apellido))
         resultado = cone.cursor.fetchone()
         
-        if resultado:  # -> Si encuentra un resultado, devuelve el ID
-            return resultado[0]
-        else:
-            return None  # ->  Si no se encuentra, devuelve None 
-    
-    except sqlite3.Error as e:
-        print("Error al obtener el ID del profesional:", e)
-        return None 
+        # if resultado:  ->> Debug que me encuentre el profesional
+        #     print(f"ID encontrado: {resultado[0]}")
+        # else:
+        #     print("No se encontró el profesional.")
+        
+        return resultado[0] if resultado else None
+    except Exception as e:
+        print(f"Error al obtener ID del profesional: {e}")
+        return None
     finally:
         cone.cerrar_conexion()
+
 #------------------------------------------
 def obtener_nombre_apellido_profesional(id_profesional):   # -> obtiene nombre y apellido del profesional por su ID
     cone = Conexion()
@@ -354,7 +378,12 @@ def guardar_turno_en_bd(dni, fecha, horario, id_profesional):
 #------------------------------------------
 def obtener_turnos_por_dni(dni):
     cone = Conexion()
-    sql = "SELECT FECHA, HORARIO FROM turnos WHERE DNI = ? ORDER BY FECHA, HORARIO"
+    # sql = "SELECT FECHA, HORARIO FROM turnos WHERE DNI = ? ORDER BY FECHA, HORARIO"
+    sql = """SELECT turnos.FECHA, turnos.HORARIO, profesionales.NOMBRE, profesionales.APELLIDO 
+        FROM turnos 
+        JOIN profesionales ON turnos.ID_PROFESIONAL = profesionales.ID_PROFESIONAL
+        WHERE turnos.DNI = ?
+        ORDER BY FECHA, HORARIO """
 
     try:
         cone.cursor.execute(sql, (dni,))
@@ -384,6 +413,32 @@ def obtener_turnos_por_fecha(fecha):
     except sqlite3.Error as e:
         print("Error al obtener los turnos:", e)
         return []
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def actualizar_turno_en_bd(dni, nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_anterior, horario_anterior):
+    cone = Conexion()
+
+    # -> Verifica si el nuevo turno ya está ocupado (excepto si es el mismo turno original)
+    sql_verificar = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ? AND NOT (FECHA = ? AND HORARIO = ?)"""
+    sql_actualizar = """UPDATE turnos SET FECHA = ?, HORARIO = ?, ID_PROFESIONAL = ? WHERE DNI = ? AND FECHA = ? AND HORARIO = ?"""
+
+    try:
+        cone.cursor.execute(sql_verificar, (nueva_fecha, nuevo_horario, fecha_anterior, horario_anterior))
+        resultado = cone.cursor.fetchone()
+
+        if resultado[0] > 0:
+            messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
+            return False  # -> No se puede modificar el turno
+
+        # -> Si el turno está disponible, lo actualiza
+        cone.cursor.execute(sql_actualizar, (nueva_fecha, nuevo_horario, nuevo_id_profesional, dni, fecha_anterior, horario_anterior))
+        cone.conexion.commit()
+        return True  # -> Retorna True si la actualización fue exitosa
+
+    except sqlite3.Error as e:
+        print("Error al actualizar el turno:", e)
+        return False
     finally:
         cone.cerrar_conexion()
 #------------------------------------------
@@ -431,6 +486,19 @@ def listar_profesionales():
         print(f"Error al listar: {e}")  # Mostrar error en consola
     finally:
        cone.cerrar_conexion()
+#------------------------------------------
+def listar_profesionales_combobox():
+    cone = Conexion()
+    try:
+        sql = "SELECT NOMBRE, APELLIDO FROM profesionales"
+        cone.cursor.execute(sql)
+        profesionales = [f"{fila[0]} {fila[1]}" for fila in cone.cursor.fetchall()]  # -> Extrae nombre y apellido
+        return profesionales
+    except Exception as e:
+        print(f"Error al listar profesionales: {e}")
+        return []
+    finally:
+        cone.cerrar_conexion()
 #------------------------------------------
 def editar_profesional(profesional, id):
     cone = Conexion()

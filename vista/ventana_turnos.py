@@ -5,7 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import qrcode
 from PIL import Image, ImageTk  
-from ddbb.consultas import buscar_por_dni_en_tto, verificar_horario_ocupado, obtener_id_profesional, obtener_nombre_apellido_profesional, turno_ocupado_para_profesional, guardar_turno_en_bd
+from ddbb.consultas import buscar_por_dni_en_tto, verificar_horario_ocupado, listar_profesionales_combobox,obtener_id_profesional, obtener_nombre_apellido_profesional, turno_ocupado_para_profesional, guardar_turno_en_bd
 #--------------------------------
 # --> Se define paleta colores 
 TITULOS = "#C93384"
@@ -21,6 +21,7 @@ class Turnos_App(tk.Frame):
         self.titulo()
         self.label()
         self.entry()
+        self.cargar_profesionales()
         self.boton_buscar_fecha()
         self.boton_reservar()        
       
@@ -44,10 +45,12 @@ class Turnos_App(tk.Frame):
         self.label_hora.place(x = 315, y = 150)
            
     def entry(self):
-        self.profesionales = ["Deborah Ajalla", "Gimena Galarza"]   # -> Lista de profesionales disponibles 
         self.profesional_var = tk.StringVar()  # -> Variable para el horario seleccionado 
-        self.combo_profesinales = ttk.Combobox(self, textvariable=self.profesional_var, values=self.profesionales, state="readonly") 
-        self.combo_profesinales.place(x = 535, y = 80)
+        self.combo_profesinales = ttk.Combobox(self, textvariable=self.profesional_var, state="readonly")
+        self.combo_profesinales.place(x=535, y=80)
+
+        # -> Carga profesionales en el Combobox
+        self.cargar_profesionales()
 
         self.fecha_var = tk.StringVar()
         self.fecha_disponible = tk.Entry(self, textvariable = self.fecha_var)
@@ -68,6 +71,10 @@ class Turnos_App(tk.Frame):
         self.boton_reservar = tk.Button (self, text = 'Reservar', command= self.reservar_turno)
         self.boton_reservar.config(width = 12, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
         self.boton_reservar.place(x = 505, y = 190)
+
+    def cargar_profesionales(self):
+        lista = listar_profesionales_combobox()  # -> Obtiene los nombres desde la BD
+        self.combo_profesinales["values"] = lista  # -> Asigna la lista al Combobox
 
     def carga_datos(self):
 
@@ -266,7 +273,6 @@ class Turnos_App(tk.Frame):
         else:
             messagebox.showerror("Error", "No se pudo guardar el turno en la base de datos.") 
             
-    
     def imprimir(self):
         contenido = self.cuadro_turno.get(1.0, tk.END).strip()
         if not contenido:
