@@ -416,28 +416,18 @@ def obtener_turnos_por_fecha(fecha):
     finally:
         cone.cerrar_conexion()
 #------------------------------------------
-def actualizar_turno_en_bd(dni, nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_anterior, horario_anterior):
+def actualizar_turno_en_bd(nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, profesional_original):
     cone = Conexion()
-
-    # -> Verifica si el nuevo turno ya está ocupado (excepto si es el mismo turno original)
-    sql_verificar = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ? AND NOT (FECHA = ? AND HORARIO = ?)"""
-    sql_actualizar = """UPDATE turnos SET FECHA = ?, HORARIO = ?, ID_PROFESIONAL = ? WHERE DNI = ? AND FECHA = ? AND HORARIO = ?"""
-
     try:
-        cone.cursor.execute(sql_verificar, (nueva_fecha, nuevo_horario, fecha_anterior, horario_anterior))
-        resultado = cone.cursor.fetchone()
-
-        if resultado[0] > 0:
-            messagebox.showwarning("Turno Ocupado", "El turno en esa fecha y horario ya está ocupado. Elija otro.")
-            return False  # -> No se puede modificar el turno
-
-        # -> Si el turno está disponible, lo actualiza
-        cone.cursor.execute(sql_actualizar, (nueva_fecha, nuevo_horario, nuevo_id_profesional, dni, fecha_anterior, horario_anterior))
+        sql = """UPDATE turnos 
+                 SET FECHA = ?, HORARIO = ?, ID_PROFESIONAL = ?
+                 WHERE FECHA = ? AND HORARIO = ? AND ID_PROFESIONAL = ?"""
+        
+        cone.cursor.execute(sql, (nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, profesional_original))
         cone.conexion.commit()
-        return True  # -> Retorna True si la actualización fue exitosa
-
-    except sqlite3.Error as e:
-        print("Error al actualizar el turno:", e)
+        return True
+    except Exception as e:
+        print(f"Error al actualizar el turno: {e}")
         return False
     finally:
         cone.cerrar_conexion()
