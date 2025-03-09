@@ -416,14 +416,25 @@ def obtener_turnos_por_fecha(fecha):
     finally:
         cone.cerrar_conexion()
 #------------------------------------------
-def actualizar_turno_en_bd(nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, profesional_original):
+def turno_ocupado(nueva_fecha, nuevo_horario, nuevo_id_profesional):
+    """ Verifica si el nuevo turno ya está ocupado """
+    cone = Conexion()
+    try:
+        sql = """SELECT COUNT(*) FROM turnos WHERE FECHA = ? AND HORARIO = ? AND ID_PROFESIONAL = ?"""
+        cone.cursor.execute(sql, (nueva_fecha, nuevo_horario, nuevo_id_profesional))
+        resultado = cone.cursor.fetchone()
+        return resultado[0] > 0  # Devuelve True si el turno ya existe
+    finally:
+        cone.cerrar_conexion()
+#------------------------------------------
+def actualizar_turno_en_bd(nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, id_profesional_original):
     cone = Conexion()
     try:
         sql = """UPDATE turnos 
                  SET FECHA = ?, HORARIO = ?, ID_PROFESIONAL = ?
                  WHERE FECHA = ? AND HORARIO = ? AND ID_PROFESIONAL = ?"""
         
-        cone.cursor.execute(sql, (nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, profesional_original))
+        cone.cursor.execute(sql, (nueva_fecha, nuevo_horario, nuevo_id_profesional, fecha_original, horario_original, id_profesional_original))
         cone.conexion.commit()
         return True
     except Exception as e:

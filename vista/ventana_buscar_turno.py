@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-from ddbb.consultas import listar_pacientes_por_dni, obtener_turnos_por_dni, actualizar_turno_en_bd, obtener_id_profesional
+from ddbb.consultas import listar_pacientes_por_dni, obtener_turnos_por_dni, actualizar_turno_en_bd, obtener_id_profesional, turno_ocupado
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import qrcode
@@ -65,7 +65,7 @@ class Buscar_Turnos(tk.Frame):
 
         # -> Crea un nuevo frame para contener el cuadro de texto y la barra scroll
         self.frame_turno = tk.Frame(self)
-        self.frame_turno.place(x=267, y=240)
+        self.frame_turno.place(x=267, y=240, height=200)  # Ajusta la altura según necesite
  
         if paciente:       
             nombre = paciente[0].title()
@@ -75,27 +75,28 @@ class Buscar_Turnos(tk.Frame):
     
             turnos = obtener_turnos_por_dni(dni)    # -> Obtiene turnos del paciente
 
-            #  -> Mensaje
-            info_paciente = f"          ~~~ DATOS DEL PACIENTE ~~~\n\n    -  Nombre: {nombre} {apellido}\n    -  DNI: {dni}\n    -  Celular: {celular}\n    -  Email: {email}\n\n\n"
-
+            # #  -> Mensaje
+            # info_paciente = f"          ~~~ DATOS DEL PACIENTE ~~~\n\n    -  Nombre: {nombre} {apellido}\n    -  DNI: {dni}\n    -  Celular: {celular}\n    -  Email: {email}\n\n\n"
 
             #-> Treeview para listar los turnos
             columnas = ("Fecha", "Horario", "Profesional")
-            self.tabla_turnos = ttk.Treeview(self.frame_turno, columns=columnas, show="headings", height=6)
+            self.tabla_turnos = ttk.Treeview(self.frame_turno, columns=columnas, show="headings", height=11)
 
             # -> Definio estilo para filas personalizadas
             self.tabla_turnos.tag_configure("deborah", background="#FFB6C1")  # Rosa claro
 
             for col in columnas:
                  self.tabla_turnos.heading(col, text=col)
-                 self.tabla_turnos.column(col, width=150)
+                 self.tabla_turnos.column(col, width=150, anchor="center")
 
             # -> Agregar Scrollbar vertical
             scroll_y = ttk.Scrollbar(self.frame_turno, orient="vertical", command=self.tabla_turnos.yview)
             self.tabla_turnos.configure(yscrollcommand=scroll_y.set)
 
-            self.tabla_turnos.place(x=0, y=500, width=510, height=160)  
-            scroll_y.place(x=500, y=0, height=160)  
+            # self.tabla_turnos.place(x=0, y=500, width=510, height=160)  
+            # scroll_y.place(x=500, y=0, height=160) 
+            self.tabla_turnos.pack(side="left", fill="both", expand=True)
+            scroll_y.pack(side="right", fill="y") 
        
             # Insertar turnos en el Treeview
             for idx, (fecha, horario, nombre_prof, apellido_prof) in enumerate(turnos):
@@ -109,24 +110,24 @@ class Buscar_Turnos(tk.Frame):
             if not hasattr(self, 'boton_modificar'):
                 self.boton_modificar = tk.Button (self, text = 'Modificar', command= self.modificar_turno)
                 self.boton_modificar.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
-                self.boton_modificar.place(x = 278, y = 460)
+                self.boton_modificar.place(x = 278, y = 485)
         
             if not hasattr(self, 'boton_imprimir'):
                 self.boton_imprimir = tk.Button (self, text = 'Imprimir', command=self.imprimir)
                 self.boton_imprimir.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
-                self.boton_imprimir.place(x = 435, y = 460)
+                self.boton_imprimir.place(x = 450, y = 485)
 
             if not hasattr(self, 'boton_qr'):
                 self.boton_qr = tk.Button (self, text = 'QR', command= self.qr)
                 self.boton_qr.config(width = 11, font = ('Arial', '11', 'bold'), fg = '#FFFFFF', bg = SECONDARY, activebackground= BOTONES,cursor='hand2')
-                self.boton_qr.place(x = 585, y = 460)
+                self.boton_qr.place(x = 620, y = 485)
         else:
             messagebox.showwarning("ADVERTENCIA!", "EL DNI INGRESADO NO ESTÁ REGISTRADO...")
             # self.cuadro_turno.insert(tk.END, "Debe ingresar un DNI para la búsqueda...")
 
     def limpiar(self):
         self.dni_var.set("")   # -> Borra el contenido del Entry
-        self.tabla_turnos.delete(1.0, tk.END)  # -> Limpia el cuadro de texto
+       #  self.tabla_turnos.delete(1.0, tk.END)  -> Limpia el cuadro de texto
 
         self.dni_buscado.focus_set()    # -> Coloca el cursor en el Entry de Fecha Disponible
          
@@ -135,7 +136,7 @@ class Buscar_Turnos(tk.Frame):
             del self.qr_label  # -> Elimina la referencia para evitar errores
 
     def imprimir(self):
-        contenido = self.cuadro_turno.get(1.0, tk.END).strip()
+        contenido = self.tabla_turnos.get(1.0, tk.END).strip()
         if not contenido:
             messagebox.showwarning("Imprimir", "No hay contenido para guardar.")
             return
@@ -156,10 +157,22 @@ class Buscar_Turnos(tk.Frame):
             messagebox.showinfo("Éxito", f"El archivo PDF se ha guardado correctamente en:\n{archivo_pdf}")  
 
     def qr (self):
-        contenido = self.cuadro_turno.get(1.0, tk.END).strip()
-        if not contenido:
+        seleccionado = self.tabla_turnos.selection()  # Obtener selección del Treeview
+        # contenido = self.tabla_turnos.get(1.0, tk.END).strip()
+        if not seleccionado:
             messagebox.showwarning("Código QR", "No hay contenido para generar el código QR.")
             return
+        
+           # Obtener los datos de la fila seleccionada
+        valores = self.tabla_turnos.item(seleccionado[0], "values")
+
+        if not valores:
+            messagebox.showwarning("Código QR", "No se pudo obtener la información del turno.")
+            return
+        
+        fecha, horario, profesional = valores
+        contenido = f"Turno:\nFecha: {fecha}\nHorario: {horario}\nProfesional: {profesional}"
+
     
         qr_img = qrcode.make(contenido)    #  -> Crea el código QR
         
@@ -176,7 +189,7 @@ class Buscar_Turnos(tk.Frame):
             self.qr_label = tk.Label(self, image=self.qr_photo, bg=PRIMARY)
             self.qr_label.place(x=765, y=40)  # -> Ubicación en la interfaz
 
-        messagebox.showinfo("Código QR", "El código QR se ha generado correctamente.")
+        #messagebox.showinfo("Código QR", "El código QR se ha generado correctamente.")
 
     def modificar_turno(self):
         seleccionado = self.tabla_turnos.selection()
@@ -195,9 +208,16 @@ class Buscar_Turnos(tk.Frame):
             messagebox.showerror("Error", "No se pudo obtener la información del turno.")
             return
       
-        fecha, horario,profesional = valores
-         
-        # Crear la ventana de modificación
+        fecha, horario,profesional_original = valores
+
+        # Obtiene el ID del profesional original
+        partes_original = profesional_original.split(maxsplit=1)
+        if len(partes_original) < 2:
+            messagebox.showerror("Error", "No se pudo obtener el ID del profesional original.")
+            return
+        id_profesional_original = obtener_id_profesional(partes_original[0], partes_original[1])
+            
+        # Creo la ventana de modificación
         self.ventana_modificar = tk.Toplevel(self)
         self.ventana_modificar.title("Modificar Turno")
         self.ventana_modificar.config(bg=PRIMARY)
@@ -207,7 +227,7 @@ class Buscar_Turnos(tk.Frame):
         # -> Creo variables para los Entry
         self.fecha_mod_var = tk.StringVar(value=fecha)
         self.hora_mod_var = tk.StringVar(value=horario)
-        self.profesional_mod_var = tk.StringVar(value=profesional)
+        self.profesional_mod_var = tk.StringVar(value=profesional_original)
 
         # -> Etiquetas label
         tk.Label(self.ventana_modificar, text="Fecha:", bg=PRIMARY, fg=BOTONES, font=("Nunito", 15, "bold")).place(x=80, y=40)
@@ -227,7 +247,6 @@ class Buscar_Turnos(tk.Frame):
 
         tk.Button(self.ventana_modificar, text="Cancelar", command=self.ventana_modificar.destroy, width=14, font=('Arial', '12', 'bold'), fg='white', bg=SECONDARY, activebackground=BOTONES, cursor='hand2').place(x=230, y=190)
 
-
     # Función para actualizar datos
     def guardar_cambios(self):
         nueva_fecha = self.fecha_mod_var.get()
@@ -240,10 +259,11 @@ class Buscar_Turnos(tk.Frame):
             messagebox.showerror("Error", "El nombre del profesional debe incluir nombre y apellido.")
             return
         
-        nombre_profesional = partes[0]  # Primera palabra como nombre
-        apellido_profesional = " ".join(partes[1:])  # Resto como apellido
+        nombre_profesional, apellido_profesional = partes
+        # nombre_profesional = partes[0]  # Primera palabra como nombre
+        # apellido_profesional = " ".join(partes[1:])  # Resto como apellido
 
-         # -> Obtener el ID del profesional (usando el nombre y apellido)
+         # -> Obtiene el ID del profesional (usando el nombre y apellido)
         nuevo_id_profesional = obtener_id_profesional(nombre_profesional, apellido_profesional)
 
         # -> Obtiene el índice del turno seleccionado
@@ -253,8 +273,20 @@ class Buscar_Turnos(tk.Frame):
         valores_originales = self.tabla_turnos.item(idx, "values")
         fecha_original, horario_original, profesional_original = valores_originales
 
+        # Obtiene ID del profesional original
+        partes_original = profesional_original.split(maxsplit=1)
+        if len(partes_original) < 2:
+            messagebox.showerror("Error", "No se pudo obtener el ID del profesional original.")
+            return
+        id_profesional_original = obtener_id_profesional(partes_original[0], partes_original[1])
+
+         # Verifica si el turno ya está ocupado
+        if turno_ocupado(nueva_fecha, nuevo_horario, nuevo_id_profesional):
+            messagebox.showerror("Error", "El turno ya está ocupado. Elija otra fecha u horario.")
+            return
+
         # -> Llamo a la función para actualizar el turno en la BD-
-        exito = actualizar_turno_en_bd( nueva_fecha, nuevo_horario, nuevo_id_profesional,fecha_original, horario_original, profesional_original)
+        exito = actualizar_turno_en_bd( nueva_fecha, nuevo_horario, nuevo_id_profesional,fecha_original, horario_original, id_profesional_original)
 
         if exito:       
             # -> Actualizo Treeview
@@ -263,7 +295,7 @@ class Buscar_Turnos(tk.Frame):
             # -> Deselecciona la fila después de la actualización
             self.tabla_turnos.selection_remove(self.idx_seleccionado)
        
-            messagebox.showinfo("Éxito", "Turno actualizado correctamente.")
+           # messagebox.showinfo("Éxito", "Turno actualizado correctamente.")
             self.ventana_modificar.destroy()
         else:
             messagebox.showerror("Error", "No se pudo actualizar el turno.")

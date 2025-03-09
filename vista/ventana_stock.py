@@ -17,6 +17,7 @@ class Productos(tk.Frame):
 
         self.titulo()
         self.mostrar_tabla()
+        self.busqueda_producto()
 #-----------------------------------------------
     def titulo(self):
         self.titulo = tk.Label(self, text= "✦ Productos ✦ ", font=("Nunito", 22, "bold"), bg=PRIMARY, fg=TITULOS)
@@ -26,19 +27,34 @@ class Productos(tk.Frame):
         self.lista_prod = listar_productos()  # --> me trae el listado que capturo con el fetchall
         self.lista_prod.reverse()             # --> invierte el orden sino aparecen en orden de agregado
 
-        self.tabla = ttk.Treeview(self, column = ('Codigo','Nombre', 'Precio','Cantidad'))
+         # Creo Frame para contener el Treeview y la barra scroll
+        frame_tabla = tk.Frame(self)
+        frame_tabla.place(x=90, y=100, width=800, height=300)
+
+        self.tabla = ttk.Treeview(frame_tabla, column = ('Codigo','Nombre', 'Precio','Cantidad'))
         self.tabla.place(x =90, y = 100, width=800, height=300) 
 
-     
-        self.tabla.heading('#0', text = 'ID')
-        self.tabla.heading('#1', text = 'Codigo')
-        self.tabla.heading('#2', text = 'Nombre')
-        self.tabla.heading('#3', text = 'Precio' )
-        self.tabla.heading('#4', text = 'Cantidad')
+        # Creo  barra sroll vertical y la asocio a la tabla
+        scrollbar = tk.Scrollbar(frame_tabla, orient="vertical", command=self.tabla.yview)
+        self.tabla.configure(yscrollcommand=scrollbar.set)
 
-        self.tabla.column ('#0', anchor = 'center', width = 20)
-        self.tabla.column ('#1', anchor = 'center', width = 30)
-        self.tabla.column ('#2', anchor = 'center', width = 120)
+        # Posiciono los widgets dentro del frame
+        self.tabla.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Encabezados de las columnas     
+        # self.tabla.heading('#0', text = 'ID') -> columna oculta > pero sigo accediendo al ID
+        self.tabla.heading('#0', text='', anchor='center')  # Sin título
+        self.tabla.heading('#1', text = 'Codigo', anchor = 'center')
+        self.tabla.heading('#2', text = 'Nombre', anchor = 'center')
+        self.tabla.heading('#3', text = 'Precio', anchor = 'center')
+        self.tabla.heading('#4', text = 'Cantidad', anchor = 'center')
+
+        # Configuración de ancho de columnas
+        self.tabla.column('#0', width=0, stretch=tk.NO)  # Oculta la columna ID
+        # self.tabla.column ('#0', anchor = 'center', width = 20)
+        self.tabla.column ('#1', anchor = 'center', width = 50) #30
+        self.tabla.column ('#2', anchor = 'center', width = 150)
         self.tabla.column ('#3', anchor = 'center', width = 70)
         self.tabla.column ('#4', anchor = 'center', width = 70)
 
@@ -59,9 +75,9 @@ class Productos(tk.Frame):
         self.boton_eliminar.config(width = 16, font = ('Arial', '12', 'bold'), fg = 'white', bg = SECONDARY,activebackground= BOTONES,cursor='hand2')
         self.boton_eliminar.place(x = 615, y = 440)
 
-        self.boton_vender = tk.Button (self, text = 'Vender')
+        self.boton_vender = tk.Button (self, text = 'Vender', command= self.ventas)
         self.boton_vender.config(width = 16, font = ('Arial', '12', 'bold'), fg = 'white', bg = SECONDARY,activebackground= BOTONES,cursor='hand2')
-        self.boton_vender.place(x = 400, y = 510)
+        self.boton_vender.place(x = 615, y = 510)
 #-----------------------------------------------
     def agregar(self):
         # -> Creo ventana nueva para agregar un producto
@@ -135,8 +151,11 @@ class Productos(tk.Frame):
         if not self.item_seleccionado:
             messagebox.showwarning("Advertencia", "Seleccione un producto para editar")
             return
+        
+        # -> Obtengo el ID oculto del item seleccionado
+        id_producto = self.tabla.item(self.item_seleccionado, "text")  # ID oculto
 
-        # > Obtengo los valores del item seleccionado
+        # > Obtengo los valores del item seleccionado 
         valores = self.tabla.item(self.item_seleccionado, "values")
 
         # -> Si el producto tiene valores, abrir ventana para editar
@@ -144,7 +163,6 @@ class Productos(tk.Frame):
             self.editar_producto(valores)
 #-----------------------------------------------
     def editar_producto(self, valores):       
-
          # -> Creo ventana nueva para modificar un producto
         self.ventana_editar = tk.Toplevel(self)
         self.ventana_editar.title("Modificar Producto")
@@ -229,8 +247,145 @@ class Productos(tk.Frame):
 
         self.mostrar_tabla()
 #-----------------------------------------------
- 
-       
+    def ventas(self):
+        # -> Obtiene producto seleccionado
+        item_seleccionado = self.tabla.selection()
+        if not item_seleccionado:
+            messagebox.showwarning("Advertencia", "Seleccione un producto para vender")
+            return
 
-       
+        valores = self.tabla.item(item_seleccionado, "values")
+        if not valores:
+            messagebox.showerror("Error", "No se pudieron obtener los datos del producto")
+            return
+        
+        codigo, nombre, precio, stock_actual = valores
+        stock_actual = int(stock_actual)  # Convertir a entero para cálculos
+        
+        # -> Creo ventana nueva para agregar un producto
+        self.ventana_ventas = tk.Toplevel(self)
+        self.ventana_ventas.title("Ventas")
+        self.ventana_ventas.config(bg=TITULOS)
+        self.ventana_ventas.geometry("500x300+420+180")
+        self.ventana_ventas.resizable(0,0)
+
+        # -> Muestra datos en etiquetas
+        tk.Label(self.ventana_ventas, text="Código:", bg=TITULOS, fg='white', font=("Nunito", 15, "bold")).place(x=120, y=40)
+        label_codigo = tk.Label(self.ventana_ventas, text=codigo, font=('Arial', '14', 'bold'), bg=TITULOS, fg='white')
+        label_codigo.place(x=220, y=40)
+
+        tk.Label(self.ventana_ventas, text="Nombre:", bg=TITULOS, fg='white', font=("Nunito", 15, "bold")).place(x=120, y=75)
+        label_nombre = tk.Label(self.ventana_ventas, text=nombre, font=('Arial', '14', 'bold'), bg=TITULOS, fg='white')
+        label_nombre.place(x=220, y=75)
+
+        tk.Label(self.ventana_ventas, text="Precio:", bg=TITULOS, fg='white', font=("Nunito", 15, "bold")).place(x=120, y=110)
+        label_precio = tk.Label(self.ventana_ventas, text=precio, font=('Arial', '14', 'bold'), bg=TITULOS, fg='white')
+        label_precio.place(x=220, y=110)
+
+        tk.Label(self.ventana_ventas, text="Stock:", bg=TITULOS, fg='white', font=("Nunito", 15, "bold")).place(x=120, y=145)
+        label_stock = tk.Label(self.ventana_ventas, text=stock_actual, font=('Arial', '14', 'bold'), bg=TITULOS, fg='white')
+        label_stock.place(x=220, y=145)
+
+        tk.Label(self.ventana_ventas, text="Cantidad a vender:", bg=TITULOS, fg='white', font=("Nunito", 15, "bold")).place(x=120, y=180)
+        entrada_cantidad = tk.Entry(self.ventana_ventas, width=6, font=('Arial', '14', 'bold'), fg=BOTONES)
+        entrada_cantidad.place(x=310, y=180)
+
+
+        def confirmar_venta():
+            cantidad_vender = entrada_cantidad.get()
+
+            if not cantidad_vender.isdigit():
+                messagebox.showerror("Error", "Ingrese una cantidad válida")
+                return
+            
+            cantidad_vender = int(cantidad_vender)
+
+            if cantidad_vender > stock_actual:
+                messagebox.showerror("Error", "Stock insuficiente")
+                return
+
+            nuevo_stock = stock_actual - cantidad_vender
+            producto_actualizado = Producto(codigo, nombre, precio, nuevo_stock)
+            producto_actualizado.id_producto = self.tabla.item(item_seleccionado, "text")
+
+            # -> Actualiza BD
+            editar_producto_en_bd(producto_actualizado, producto_actualizado.id_producto)
+
+            # -> Actualiza Treeview
+            self.tabla.item(item_seleccionado, values=(codigo, nombre, precio, nuevo_stock))
+
+            # -> Cierra ventana
+            self.ventana_ventas.destroy()
+        
+        # -> Botón para vender el producto
+        boton_vender = tk.Button(self.ventana_ventas, text="Confirmar Venta", command= confirmar_venta)
+        boton_vender.config(width = 14, font = ('Arial', '12', 'bold'), fg = 'white', bg = SECONDARY,activebackground= BOTONES,cursor='hand2')
+        boton_vender.place(x= 260, y=235 )  
+
+        # -> Botón para cancelar la operación
+        boton_cancelar = tk.Button(self.ventana_ventas, text="Cancelar", command= self.ventana_ventas.destroy)
+        boton_cancelar.config(width = 14, font = ('Arial', '12', 'bold'), fg = 'white', bg = SECONDARY,activebackground= BOTONES,cursor='hand2')
+        boton_cancelar.place(x= 90, y=235 )  
+#-----------------------------------------------
+    def busqueda_producto(self):
+        # tk.Label(self, text="Producto:", font=("Nunito", 12, "bold"), bg=PRIMARY, fg=TITULOS).place(x= 100, y=510)
+      
+        self.entry_busqueda = tk.Entry(self, width = 18, font = ('Arial', '13', 'bold'), fg=  BOTONES)
+         # -> Agrega el placeholder
+        self.entry_busqueda.insert(0, "Buscar producto...") 
+        # self.entry_busqueda.config(width = 18, font = ('Arial', '13', 'bold'), fg=BOTONES)
+        self.entry_busqueda.place(x=195, y= 510)
+
+        #-> Asocia eventos para manejar el placeholder
+        self.entry_busqueda.bind("<FocusIn>", self.on_entry_click)
+        self.entry_busqueda.bind("<FocusOut>", self.on_focus_out)
+
+        self.boton_buscar = tk.Button(self, text="Buscar", command=self.buscar_producto)
+        self.boton_buscar.config(width = 16, font = ('Arial', '12', 'bold'), fg='white', bg=SECONDARY, activebackground=BOTONES, cursor='hand2')
+        self.boton_buscar.place(x = 400, y = 510)
+#-----------------------------------------------
+    def on_entry_click(self, event):
+        """ Borra el placeholder cuando el usuario hace clic en el Entry """
+        if self.entry_busqueda.get() == "Buscar producto...":
+            self.entry_busqueda.delete(0, tk.END)
+            self.entry_busqueda.config(fg= BOTONES)
+#-----------------------------------------------
+    def on_focus_out(self, event):
+        """ Vuelve a colocar el placeholder si el Entry está vacío """
+        if self.entry_busqueda.get() == "":
+            self.entry_busqueda.insert(0, "Buscar producto...")
+            self.entry_busqueda.config(fg= BOTONES)
+#-----------------------------------------------
+    def buscar_producto(self):
+        nombre_buscado = self.entry_busqueda.get().strip().lower()
+        
+        if not nombre_buscado:
+            messagebox.showwarning("Advertencia", "Ingrese un nombre de producto para buscar")
+            return
+   
+        encontrado = False
+        
+        # -> Itera sobre los elementos del Treeview
+        for item in self.tabla.get_children():
+            valores = self.tabla.item(item, "values")  # -> Obtiene los valores de la fila
+            nombre_producto = valores[1].strip().lower()  # -> Obtiene el nombre del producto
+            
+            if nombre_buscado in nombre_producto:
+                # -> Selecciona el producto encontrado
+                self.tabla.selection_set(item)
+                self.tabla.focus(item)
+                self.tabla.see(item)  # -> Hace scroll hasta el producto encontrado
+                encontrado = True
+                break
+        
+        if not encontrado:
+            messagebox.showinfo("Información", "Producto no encontrado")
+
+         # Limpia el Entry después de la búsqueda
+        self.entry_busqueda.delete(0, tk.END)
+
+
+
+     
+        
 
